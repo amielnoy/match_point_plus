@@ -36,8 +36,8 @@ export default function MatchesPage() {
     if (api) {
         if(api.selectedScrollSnap() === users.length -1){
             toast({
-                title: "That's everyone for now!",
-                description: "Check back later for new potential matches.",
+                title: "זה הכל לעכשיו!",
+                description: "חזור/י מאוחר יותר למציאת התאמות חדשות.",
             })
         }
       api.scrollNext();
@@ -57,7 +57,7 @@ export default function MatchesPage() {
       setAiSummaries(prev => ({ ...prev, [matchUser.id]: summary.summary }));
     } catch (error) {
       console.error("Error fetching AI summary:", error);
-      setAiSummaries(prev => ({ ...prev, [matchUser.id]: "Could not generate compatibility summary." }));
+      setAiSummaries(prev => ({ ...prev, [matchUser.id]: "לא ניתן היה ליצור סיכום תאימות." }));
     } finally {
       setIsLoadingSummary(false);
     }
@@ -66,15 +66,15 @@ export default function MatchesPage() {
   if (!users.length) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-center">
-        <h2 className="text-2xl font-headline mb-2">That's everyone for now!</h2>
-        <p className="text-muted-foreground">Check back later for new potential matches.</p>
+        <h2 className="text-2xl font-headline mb-2">זה הכל לעכשיו!</h2>
+        <p className="text-muted-foreground">חזור/י מאוחר יותר למציאת התאמות חדשות.</p>
       </div>
     );
   }
 
   return (
     <div className="container mx-auto max-w-sm py-8 flex flex-col items-center">
-      <Carousel setApi={setApi} className="w-full">
+      <Carousel setApi={setApi} className="w-full" dir="rtl">
         <CarouselContent>
           {users.map((user) => (
             <CarouselItem key={user.id}>
@@ -89,14 +89,14 @@ export default function MatchesPage() {
                     priority
                     data-ai-hint="person portrait"
                   />
-                  <div className="absolute bottom-0 left-0 w-full h-2/3 bg-gradient-to-t from-black/90 to-transparent p-6 flex flex-col justify-end rounded-b-lg">
+                  <div className="absolute bottom-0 left-0 w-full h-2/3 bg-gradient-to-t from-black/90 to-transparent p-6 flex flex-col justify-end rounded-b-lg text-right">
                     <h2 className="text-4xl font-headline text-white">{user.name}, {user.age}</h2>
-                    <div className="flex items-center gap-2 text-white/80 mt-1">
-                      <MapPin className="w-4 h-4"/>
+                    <div className="flex items-center justify-end gap-2 text-white/80 mt-1">
                       <span>{user.location}</span>
+                      <MapPin className="w-4 h-4"/>
                     </div>
                     <p className="text-white/90 mt-4 line-clamp-2 font-body">{user.bio}</p>
-                     <div className="flex flex-wrap gap-2 mt-4">
+                     <div className="flex flex-wrap justify-end gap-2 mt-4">
                         {user.interests.slice(0, 4).map((interest) => (
                           <Badge key={interest} variant="secondary" className="bg-white/20 text-white border-transparent backdrop-blur-sm">
                             {interest}
@@ -106,7 +106,7 @@ export default function MatchesPage() {
                   </div>
                    <Dialog onOpenChange={(open) => open && getAiSummary(user)}>
                       <DialogTrigger asChild>
-                         <Button variant="ghost" size="icon" className="absolute top-4 right-4 bg-black/30 hover:bg-black/50 text-white rounded-full">
+                         <Button variant="ghost" size="icon" className="absolute top-4 left-4 bg-black/30 hover:bg-black/50 text-white rounded-full">
                            <Sparkles className="w-5 h-5" />
                          </Button>
                       </DialogTrigger>
@@ -114,10 +114,10 @@ export default function MatchesPage() {
                         <DialogHeader>
                           <DialogTitle className="font-headline text-2xl flex items-center gap-2">
                              <Sparkles className="w-5 h-5 text-primary"/>
-                            Compatibility Sparks
+                            ניצוצות של תאימות
                           </DialogTitle>
                           <DialogDescription>
-                            AI-powered insights into your potential connection with {user.name}.
+                            תובנות מבוססות בינה מלאכותית על החיבור הפוטנציאלי שלך עם {user.name}.
                           </DialogDescription>
                         </DialogHeader>
                         {isLoadingSummary ? (

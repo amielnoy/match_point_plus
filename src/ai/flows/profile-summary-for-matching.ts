@@ -30,7 +30,7 @@ const prompt = ai.definePrompt({
   name: 'profileSummaryForMatchingPrompt',
   input: {schema: ProfileSummaryForMatchingInputSchema},
   output: {schema: ProfileSummaryForMatchingOutputSchema},
-  prompt: `You are a matching expert. You will be given two user profiles and you will generate a summary of the two profiles highlighting common interests and compatibility factors.
+  prompt: `You are a matching expert. You will be given two user profiles and you will generate a summary of the two profiles highlighting common interests and compatibility factors. Respond in Hebrew.
 
 User Profile: {{{userProfile}}}
 Match Profile: {{{matchProfile}}}`,

@@ -6,51 +6,51 @@ const getImage = (id: string) => PlaceHolderImages.find(img => img.id === id)?.i
 export const users: User[] = [
   {
     id: '1',
-    name: 'Sophia',
+    name: 'סופיה',
     age: 28,
-    location: 'San Francisco, CA',
-    bio: 'Lover of art, long walks on the beach, and my golden retriever, Sunny. Looking for someone to share adventures with.',
-    interests: ['Art', 'Hiking', 'Dogs', 'Traveling'],
+    location: 'תל אביב-יפו',
+    bio: 'אוהבת אמנות, הליכות ארוכות על החוף ואת הגולדן רטריבר שלי, סאני. מחפשת מישהו לחלוק איתו הרפתקאות.',
+    interests: ['אמנות', 'טיולים', 'כלבים', 'נסיעות'],
     profilePicture: getImage('profile1'),
     pictures: [getImage('profile1'), getImage('profile3'), getImage('profile6')],
   },
   {
     id: '2',
-    name: 'Liam',
+    name: 'ליאם',
     age: 32,
-    location: 'New York, NY',
-    bio: 'Software engineer by day, musician by night. I can probably beat you at Mario Kart. Let\'s grab a coffee.',
-    interests: ['Music', 'Gaming', 'Coffee', 'Technology'],
+    location: 'ירושלים',
+    bio: 'מהנדס תוכנה ביום, מוזיקאי בלילה. כנראה אנצח אותך במריו קארט. בוא/י נשתה קפה.',
+    interests: ['מוזיקה', 'גיימינג', 'קפה', 'טכנולוגיה'],
     profilePicture: getImage('profile2'),
     pictures: [getImage('profile2'), getImage('profile5'), getImage('profile8')],
   },
   {
     id: '3',
-    name: 'Olivia',
+    name: 'אוליביה',
     age: 25,
-    location: 'Austin, TX',
-    bio: 'Just a girl who loves tacos, live music, and exploring new cities. Fluent in sarcasm and movie quotes.',
-    interests: ['Tacos', 'Live Music', 'Travel', 'Movies'],
+    location: 'חיפה',
+    bio: 'סתם בחורה שאוהבת טאקו, מוזיקה חיה ולחקור ערים חדשות. דוברת סרקזם וציטוטים מסרטים שוטף.',
+    interests: ['טאקו', 'הופעות חיות', 'טיולים', 'סרטים'],
     profilePicture: getImage('profile4'),
     pictures: [getImage('profile4'), getImage('profile6'), getImage('profile7')],
   },
   {
     id: '4',
-    name: 'Noah',
+    name: 'נוח',
     age: 30,
-    location: 'Chicago, IL',
-    bio: 'Fitness enthusiast, aspiring chef, and a firm believer that pineapple belongs on pizza. Change my mind.',
-    interests: ['Fitness', 'Cooking', 'Pizza', 'Reading'],
+    location: 'באר שבע',
+    bio: 'חובב כושר, שף שאפתן, ומאמין גדול שאננס שייך על פיצה. שכנע/י אותי אחרת.',
+    interests: ['כושר', 'בישול', 'פיצה', 'קריאה'],
     profilePicture: getImage('profile5'),
     pictures: [getImage('profile5'), getImage('profile2'), getImage('profile8')],
   },
   {
     id: '5',
-    name: 'Ava',
+    name: 'אווה',
     age: 29,
-    location: 'Los Angeles, CA',
-    bio: 'Actress, yogi, and aspiring plant mom. My ideal date is a farmers market trip followed by cooking a meal together.',
-    interests: ['Yoga', 'Acting', 'Plants', 'Cooking'],
+    location: 'ראשון לציון',
+    bio: 'שחקנית, יוגיסטית ואמא שאפתנית לצמחים. הדייט האידיאלי שלי הוא ביקור בשוק איכרים ואז לבשל ארוחה ביחד.',
+    interests: ['יוגה', 'משחק', 'צמחים', 'בישול'],
     profilePicture: getImage('profile7'),
     pictures: [getImage('profile7'), getImage('profile1'), getImage('profile3')],
   }
@@ -58,11 +58,11 @@ export const users: User[] = [
 
 export const currentUser: User = {
     id: 'current-user',
-    name: 'Alex',
+    name: 'אלכס',
     age: 29,
-    location: 'San Francisco, CA',
-    bio: 'Creative soul exploring the city. I enjoy photography, finding hidden cafes, and witty banter. Looking for a genuine connection.',
-    interests: ['Photography', 'Coffee', 'Art', 'Design'],
+    location: 'תל אביב-יפו',
+    bio: 'נפש יצירתית שמגלה את העיר. אני נהנה/ת מצילום, מציאת בתי קפה נסתרים ושיחות שנונות. מחפש/ת קשר אמיתי.',
+    interests: ['צילום', 'קפה', 'אמנות', 'עיצוב'],
     profilePicture: getImage('currentUser'),
     pictures: [getImage('currentUser'), 'https://picsum.photos/seed/me2/400/600', 'https://picsum.photos/seed/me3/400/600']
 }
@@ -71,32 +71,32 @@ export const conversations: Conversation[] = [
     {
         id: '1',
         participant: users[0],
-        lastMessage: { text: 'Hey, I love your dog! What\'s his name?', timestamp: '2h ago' },
+        lastMessage: { text: 'היי, אני אוהבת את הכלב שלך! איך קוראים לו?', timestamp: 'לפני שעתיים' },
         unreadCount: 1,
     },
     {
         id: '2',
         participant: users[2],
-        lastMessage: { text: 'I\'m also a big fan of tacos! We should get some.', timestamp: '1d ago' },
+        lastMessage: { text: 'גם אני חובבת טאקו גדולה! אנחנו צריכים ללכת לאכול.', timestamp: 'אתמול' },
         unreadCount: 0,
     },
     {
         id: '3',
         participant: users[3],
-        lastMessage: { text: 'Pineapple on pizza is a crime, but I\'m willing to forgive you. 😉', timestamp: '3d ago' },
+        lastMessage: { text: 'אננס על פיצה זה פשע, אבל אני מוכנה לסלוח לך. 😉', timestamp: 'לפני 3 ימים' },
         unreadCount: 0,
     }
 ];
 
 export const messages: Record<string, Message[]> = {
   '1': [
-    { id: 'm1', senderId: '1', text: 'Hey, I love your dog! What\'s his name?', timestamp: '2h ago' },
-    { id: 'm2', senderId: 'current-user', text: 'Thanks! His name is Sunny. He\'s the best.', timestamp: '1h ago' },
+    { id: 'm1', senderId: '1', text: 'היי, אני אוהבת את הכלב שלך! איך קוראים לו?', timestamp: 'לפני שעתיים' },
+    { id: 'm2', senderId: 'current-user', text: 'תודה! קוראים לו סאני. הוא הכי טוב.', timestamp: 'לפני שעה' },
   ],
   '2': [
-    { id: 'm3', senderId: '3', text: 'I\'m also a big fan of tacos! We should get some.', timestamp: '1d ago' },
+    { id: 'm3', senderId: '3', text: 'גם אני חובבת טאקו גדולה! אנחנו צריכים ללכת לאכול.', timestamp: 'אתמול' },
   ],
   '3': [
-    { id: 'm4', senderId: '3', text: 'Pineapple on pizza is a crime, but I\'m willing to forgive you. 😉', timestamp: '3d ago' },
+    { id: 'm4', senderId: '3', text: 'אננס על פיצה זה פשע, אבל אני מוכנה לסלוח לך. 😉', timestamp: 'לפני 3 ימים' },
   ],
 };

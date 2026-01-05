@@ -7,7 +7,7 @@ import {
   MessageSquare,
   User,
   Settings,
-  PanelLeft,
+  PanelRight,
 } from "lucide-react";
 
 import {
@@ -27,8 +27,8 @@ import { currentUser } from "@/lib/data";
 import { Separator } from "./ui/separator";
 
 const navItems = [
-  { href: "/matches", icon: Heart, label: "Matches" },
-  { href: "/messages", icon: MessageSquare, label: "Messages" },
+  { href: "/matches", icon: Heart, label: "התאמות" },
+  { href: "/messages", icon: MessageSquare, label: "הודעות" },
 ];
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
@@ -36,7 +36,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarProvider>
-      <Sidebar>
+      <Sidebar side="right">
         <SidebarHeader>
           <Logo />
         </SidebarHeader>
@@ -48,8 +48,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   isActive={pathname.startsWith(item.href)}
                   tooltip={item.label}
                 >
-                  <item.icon />
                   <span>{item.label}</span>
+                  <item.icon />
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
@@ -62,13 +62,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <Link href="/profile" legacyBehavior passHref>
                 <SidebarMenuButton
                     isActive={pathname === "/profile"}
-                    tooltip="My Profile"
+                    tooltip="הפרופיל שלי"
                 >
+                   <span>הפרופיל שלי</span>
                   <Avatar className="h-7 w-7">
                     <AvatarImage src={currentUser.profilePicture} alt={currentUser.name} />
                     <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
                   </Avatar>
-                  <span>My Profile</span>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
@@ -76,10 +76,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <Link href="/settings" legacyBehavior passHref>
                 <SidebarMenuButton
                   isActive={pathname === "/settings"}
-                  tooltip="Settings"
+                  tooltip="הגדרות"
                 >
+                  <span>הגדרות</span>
                   <Settings />
-                  <span>Settings</span>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
@@ -88,13 +88,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       </Sidebar>
       <SidebarInset>
         <header className="flex h-14 items-center gap-4 border-b bg-background px-4 md:hidden">
-          <SidebarTrigger>
-            <PanelLeft className="h-6 w-6" />
-            <span className="sr-only">Toggle Menu</span>
-          </SidebarTrigger>
-          <div className="flex-1">
+           <div className="flex-1">
             <Logo />
           </div>
+          <SidebarTrigger>
+            <PanelRight className="h-6 w-6" />
+            <span className="sr-only">פתח תפריט</span>
+          </SidebarTrigger>
         </header>
         {children}
       </SidebarInset>

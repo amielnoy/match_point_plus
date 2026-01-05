@@ -24,24 +24,24 @@ export default function LoginPage() {
             <Sparkles className="w-8 h-8 text-primary" />
             <h1 className="text-4xl font-headline text-primary">MatchSpark</h1>
           </div>
-          <CardTitle className="font-headline text-2xl">Welcome Back</CardTitle>
-          <CardDescription>Enter your credentials to find your spark.</CardDescription>
+          <CardTitle className="font-headline text-2xl">ברוכים הבאים</CardTitle>
+          <CardDescription>הזינו את הפרטים שלכם כדי למצוא את הניצוץ שלכם.</CardDescription>
         </CardHeader>
         <form onSubmit={handleLogin}>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 text-right">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="you@example.com" defaultValue="alex@matchspark.com" required />
+              <Label htmlFor="email">אימייל</Label>
+              <Input id="email" type="email" placeholder="you@example.com" defaultValue="alex@matchspark.com" required dir="ltr" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" defaultValue="password" required />
+              <Label htmlFor="password">סיסמה</Label>
+              <Input id="password" type="password" defaultValue="password" required dir="ltr" />
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
-            <Button type="submit" className="w-full font-headline">Log In</Button>
+            <Button type="submit" className="w-full font-headline">כניסה</Button>
             <p className="text-xs text-muted-foreground">
-              Don't have an account? <Link href="#" className="text-primary hover:underline">Sign Up</Link>
+              אין לכם חשבון? <Link href="#" className="text-primary hover:underline">הרשמה</Link>
             </p>
           </CardFooter>
         </form>

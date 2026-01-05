@@ -34,7 +34,7 @@ const prompt = ai.definePrompt({
   name: 'suggestProfileImprovementsPrompt',
   input: {schema: SuggestProfileImprovementsInputSchema},
   output: {schema: SuggestProfileImprovementsOutputSchema},
-  prompt: `You are an expert dating profile consultant. Analyze the user's profile and preferences and provide actionable suggestions to improve their profile and attract better matches.
+  prompt: `You are an expert dating profile consultant. Analyze the user's profile and preferences and provide actionable suggestions to improve their profile and attract better matches. Respond in Hebrew.
 
 User Profile Summary: {{{profileSummary}}}
 

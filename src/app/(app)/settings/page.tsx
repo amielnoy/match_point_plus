@@ -26,10 +26,10 @@ import { Trash2, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 const profileFormSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters."),
-  bio: z.string().max(300, "Bio cannot exceed 300 characters.").min(10, "Bio must be at least 10 characters."),
+  name: z.string().min(2, "שם חייב להכיל לפחות 2 תווים."),
+  bio: z.string().max(300, "ביו לא יכול לעלות על 300 תווים.").min(10, "ביו חייב להכיל לפחות 10 תווים."),
   location: z.string(),
-  interests: z.array(z.string()).max(8, "You can add up to 8 interests."),
+  interests: z.array(z.string()).max(8, "ניתן להוסיף עד 8 תחומי עניין."),
 });
 
 const preferencesFormSchema = z.object({
@@ -61,26 +61,26 @@ export default function SettingsPage() {
 
   function onProfileSubmit(data: ProfileFormValues) {
     toast({
-      title: "Profile Updated",
-      description: "Your changes have been saved successfully.",
+      title: "הפרופיל עודכן",
+      description: "השינויים נשמרו בהצלחה.",
     });
   }
   
   function onPreferencesSubmit(data: PreferencesFormValues) {
     toast({
-      title: "Preferences Saved",
-      description: "Your matching preferences have been updated.",
+      title: "ההעדפות נשמרו",
+      description: "העדפות ההתאמה שלך עודכנו.",
     });
   }
   
   return (
-    <div className="container mx-auto max-w-4xl py-8 px-4 md:px-6">
-      <h1 className="text-3xl font-headline mb-6">Settings</h1>
-      <Tabs defaultValue="profile" className="w-full">
+    <div className="container mx-auto max-w-4xl py-8 px-4 md:px-6 text-right">
+      <h1 className="text-3xl font-headline mb-6">הגדרות</h1>
+      <Tabs defaultValue="profile" className="w-full" dir="rtl">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="photos">Photos</TabsTrigger>
-          <TabsTrigger value="preferences">Preferences</TabsTrigger>
+          <TabsTrigger value="profile">פרופיל</TabsTrigger>
+          <TabsTrigger value="photos">תמונות</TabsTrigger>
+          <TabsTrigger value="preferences">העדפות</TabsTrigger>
         </TabsList>
         <TabsContent value="profile" className="mt-6">
           <Card>
@@ -92,7 +92,7 @@ export default function SettingsPage() {
                     name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Name</FormLabel>
+                        <FormLabel>שם</FormLabel>
                         <FormControl>
                           <Input {...field} />
                         </FormControl>
@@ -105,12 +105,12 @@ export default function SettingsPage() {
                     name="bio"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>About Me</FormLabel>
+                        <FormLabel>קצת עליי</FormLabel>
                         <FormControl>
                           <Textarea rows={5} {...field} />
                         </FormControl>
                          <FormDescription>
-                            A short and sweet bio to attract your spark.
+                            ביו קצר וקולע למשוך את הניצוץ שלך.
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -121,7 +121,7 @@ export default function SettingsPage() {
                     name="location"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Location</FormLabel>
+                        <FormLabel>מיקום</FormLabel>
                         <FormControl>
                           <Input {...field} />
                         </FormControl>
@@ -130,15 +130,15 @@ export default function SettingsPage() {
                     )}
                   />
                   <FormItem>
-                     <FormLabel>Interests</FormLabel>
-                     <div className="flex flex-wrap gap-2">
+                     <FormLabel>תחומי עניין</FormLabel>
+                     <div className="flex flex-wrap gap-2 justify-end">
                         {profileForm.getValues('interests').map(interest => (
                             <Badge key={interest} variant="secondary">{interest}</Badge>
                         ))}
                      </div>
-                     <FormDescription>Edit your interests to improve matches.</FormDescription>
+                     <FormDescription>ערכו את תחומי העניין שלכם לשיפור ההתאמות.</FormDescription>
                   </FormItem>
-                  <Button type="submit">Save Changes</Button>
+                  <Button type="submit">שמירת שינויים</Button>
                 </form>
               </Form>
             </CardContent>
@@ -147,11 +147,11 @@ export default function SettingsPage() {
         <TabsContent value="photos" className="mt-6">
             <Card>
                 <CardContent className="pt-6">
-                    <p className="text-sm text-muted-foreground mb-4">Manage your profile pictures. Your first picture is your main one.</p>
+                    <p className="text-sm text-muted-foreground mb-4">נהלו את תמונות הפרופיל שלכם. התמונה הראשונה היא הראשית.</p>
                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                         {currentUser.pictures.map((pic, index) => (
                             <Card key={index} className="overflow-hidden aspect-square relative group shadow-sm">
-                                <Image src={pic} alt={`Photo ${index + 1}`} fill className="object-cover" data-ai-hint="person lifestyle" />
+                                <Image src={pic} alt={`תמונה ${index + 1}`} fill className="object-cover" data-ai-hint="person lifestyle" />
                                 <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                     <Button variant="destructive" size="icon"><Trash2 className="h-4 w-4" /></Button>
                                 </div>
@@ -160,7 +160,7 @@ export default function SettingsPage() {
                         <Card className="aspect-square flex items-center justify-center border-dashed hover:border-primary hover:text-primary transition-colors">
                              <Button variant="ghost" className="flex flex-col h-24 w-24">
                                 <Plus className="h-6 w-6 mb-1"/>
-                                Add Photo
+                                הוספת תמונה
                              </Button>
                         </Card>
                     </div>
@@ -177,9 +177,10 @@ export default function SettingsPage() {
                     name="ageRange"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Age Range</FormLabel>
+                        <FormLabel>טווח גילאים</FormLabel>
                         <FormControl>
                           <Slider
+                            dir="rtl"
                             min={18}
                             max={70}
                             step={1}
@@ -188,8 +189,8 @@ export default function SettingsPage() {
                           />
                         </FormControl>
                         <div className="flex justify-between text-sm text-muted-foreground">
-                            <span>{field.value[0]}</span>
                             <span>{field.value[1]}</span>
+                            <span>{field.value[0]}</span>
                         </div>
                       </FormItem>
                     )}
@@ -199,9 +200,10 @@ export default function SettingsPage() {
                     name="distance"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Maximum Distance</FormLabel>
+                        <FormLabel>מרחק מקסימלי</FormLabel>
                         <FormControl>
                           <Slider
+                            dir="rtl"
                             min={1}
                             max={100}
                             step={1}
@@ -210,12 +212,12 @@ export default function SettingsPage() {
                           />
                         </FormControl>
                         <div className="text-sm text-muted-foreground text-center">
-                            {field.value} miles
+                            {field.value} ק"מ
                         </div>
                       </FormItem>
                     )}
                   />
-                  <Button type="submit">Save Preferences</Button>
+                  <Button type="submit">שמירת העדפות</Button>
                 </form>
               </Form>
             </CardContent>

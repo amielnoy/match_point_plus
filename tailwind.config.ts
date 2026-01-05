@@ -17,7 +17,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        headline: ["'Belleza'", 'sans-serif'],
+        headline: ["'Frank Ruhl Libre'", 'serif'],
         body: ["'Alegreya'", 'serif'],
         code: ['monospace'],
       },
