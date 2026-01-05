@@ -1,3 +1,58 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "profile1",
+      "description": "Woman smiling",
+      "imageUrl": "https://images.unsplash.com/photo-1610655507808-a59293f4e332?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHx3b21hbiUyMHBvcnRyYWl0fGVufDB8fHx8MTc2NzU3OTc1Mnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "woman portrait"
+    },
+    {
+      "id": "profile2",
+      "description": "Man with a dog",
+      "imageUrl": "https://images.unsplash.com/photo-1581660878988-f326ec5a672c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxtYW4lMjBkb2d8ZW58MHx8fHwxNzY3NjE1OTExfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "man dog"
+    },
+    {
+      "id": "profile3",
+      "description": "Person hiking",
+      "imageUrl": "https://images.unsplash.com/photo-1728574468961-d2357163c023?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxwZXJzb24lMjBoaWtpbmd8ZW58MHx8fHwxNzY3NTk1MTc2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person hiking"
+    },
+    {
+      "id": "profile4",
+      "description": "Woman laughing",
+      "imageUrl": "https://images.unsplash.com/photo-1535295972055-1c762f4483e5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx3b21hbiUyMGxhdWdoaW5nfGVufDB8fHx8MTc2NzUzMjA4N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "woman laughing"
+    },
+    {
+      "id": "profile5",
+      "description": "Man in a city",
+      "imageUrl": "https://images.unsplash.com/photo-1619950498711-c2d22c4c3cb7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxtYW4lMjBjaXR5fGVufDB8fHx8MTc2NzUzODMxM3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "man city"
+    },
+    {
+      "id": "profile6",
+      "description": "Person at a cafe",
+      "imageUrl": "https://images.unsplash.com/photo-1637766899618-8c751a1e06bc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxwZXJzb24lMjBjYWZlfGVufDB8fHx8MTc2NzU2Mzk4OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person cafe"
+    },
+    {
+      "id": "profile7",
+      "description": "Woman with glasses",
+      "imageUrl": "https://images.unsplash.com/photo-1524255684952-d7185b509571?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHx3b21hbiUyMGdsYXNzZXN8ZW58MHx8fHwxNzY3NTU3NTIyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "woman glasses"
+    },
+    {
+      "id": "profile8",
+      "description": "Man playing guitar",
+      "imageUrl": "https://images.unsplash.com/photo-1635350480795-96f42131e4a2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxtYW4lMjBndWl0YXJ8ZW58MHx8fHwxNzY3NTk2MDIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "man guitar"
+    },
+    {
+      "id": "currentUser",
+      "description": "Current user profile picture",
+      "imageUrl": "https://images.unsplash.com/photo-1590086782792-42dd2350140d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxwZXJzb24lMjBwb3J0cmFpdHxlbnwwfHx8fDE3Njc1MTExMDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person portrait"
+    }
+  ]
 }
