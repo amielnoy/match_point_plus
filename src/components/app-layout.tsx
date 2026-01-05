@@ -43,15 +43,16 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <SidebarMenu>
           {navItems.map((item) => (
             <SidebarMenuItem key={item.href}>
-              <Link href={item.href} legacyBehavior passHref>
-                <SidebarMenuButton
+              <SidebarMenuButton
+                  asChild
                   isActive={pathname.startsWith(item.href)}
                   tooltip={item.label}
                 >
-                  <span>{item.label}</span>
-                  <item.icon />
+                  <Link href={item.href}>
+                    <span>{item.label}</span>
+                    <item.icon />
+                  </Link>
                 </SidebarMenuButton>
-              </Link>
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
@@ -59,29 +60,31 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <Separator className="my-2" />
           <SidebarMenu>
             <SidebarMenuItem>
-              <Link href="/profile" legacyBehavior passHref>
                 <SidebarMenuButton
+                    asChild
                     isActive={pathname === "/profile"}
                     tooltip="הפרופיל שלי"
                 >
-                   <span>הפרופיל שלי</span>
-                  <Avatar className="h-7 w-7">
-                    <AvatarImage src={currentUser.profilePicture} alt={currentUser.name} />
-                    <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
-                  </Avatar>
+                   <Link href="/profile">
+                    <span>הפרופיל שלי</span>
+                    <Avatar className="h-7 w-7">
+                        <AvatarImage src={currentUser.profilePicture} alt={currentUser.name} />
+                        <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                  </Link>
                 </SidebarMenuButton>
-              </Link>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <Link href="/settings" legacyBehavior passHref>
                 <SidebarMenuButton
+                  asChild
                   isActive={pathname === "/settings"}
                   tooltip="הגדרות"
                 >
-                  <span>הגדרות</span>
-                  <Settings />
+                  <Link href="/settings">
+                    <span>הגדרות</span>
+                    <Settings />
+                  </Link>
                 </SidebarMenuButton>
-              </Link>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarFooter>
