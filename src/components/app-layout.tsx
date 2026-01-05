@@ -44,11 +44,9 @@ function HeaderContent() {
              {isMobile && <Logo />}
           </div>
           {showTrigger && (
-            <SidebarTrigger asChild>
-                <Button variant="ghost" size="icon">
-                    <PanelRight className="h-6 w-6" />
-                    <span className="sr-only">פתח תפריט</span>
-                </Button>
+            <SidebarTrigger>
+                <PanelRight className="h-6 w-6" />
+                <span className="sr-only">פתח תפריט</span>
             </SidebarTrigger>
           )}
         </header>
