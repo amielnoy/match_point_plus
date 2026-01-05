@@ -20,16 +20,41 @@ import {
   SidebarInset,
   SidebarFooter,
   SidebarTrigger,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { Logo } from "@/components/logo";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { currentUser } from "@/lib/data";
 import { Separator } from "./ui/separator";
+import { Button } from "./ui/button";
 
 const navItems = [
   { href: "/matches", icon: Heart, label: "התאמות" },
   { href: "/messages", icon: MessageSquare, label: "הודעות" },
 ];
+
+function HeaderContent() {
+    const { state, isMobile } = useSidebar();
+    const showTrigger = isMobile || state === 'collapsed';
+
+    return (
+        <header className="flex h-14 items-center gap-4 border-b bg-background px-4 md:px-6 justify-between">
+           <div className="flex-1">
+             {!showTrigger && <div className="md:hidden"><Logo /></div>}
+             {isMobile && <Logo />}
+          </div>
+          {showTrigger && (
+            <SidebarTrigger asChild>
+                <Button variant="ghost" size="icon">
+                    <PanelRight className="h-6 w-6" />
+                    <span className="sr-only">פתח תפריט</span>
+                </Button>
+            </SidebarTrigger>
+          )}
+        </header>
+    )
+}
+
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -90,15 +115,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
-        <header className="flex h-14 items-center gap-4 border-b bg-background px-4 md:hidden">
-           <div className="flex-1">
-            <Logo />
-          </div>
-          <SidebarTrigger>
-            <PanelRight className="h-6 w-6" />
-            <span className="sr-only">פתח תפריט</span>
-          </SidebarTrigger>
-        </header>
+        <HeaderContent />
         {children}
       </SidebarInset>
     </SidebarProvider>
