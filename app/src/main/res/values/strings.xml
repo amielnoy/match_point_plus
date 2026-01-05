@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">MatchPointPlus</string>
+    <string name="login">כניסה</string>
+    <string name="email_hint">אימייל</string>
+    <string name="password_hint">סיסמה</string>
+    <string name="no_matches">זה הכל לעכשיו!</string>
+    <string name="no_matches_desc">חזור/י מאוחר יותר למציאת התאמות חדשות.</string>
+    <string name="ai_summary_title">ניצוצות של תאימות</string>
+    <string name="ai_summary_desc">תובנות מבוססות בינה מלאכותית על החיבור הפוטנציאלי שלך עם %1$s.</string>
+</resources>
