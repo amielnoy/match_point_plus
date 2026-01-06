@@ -71,7 +71,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textEmailAddress"
-                    android:text="alex@matchspark.com"
                     android:textDirection="ltr" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -79,14 +78,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:hint="סיסמה">
+                android:hint="סיסמה"
+                app:passwordToggleEnabled="true">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/passwordEditText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textPassword"
-                    android:text="password"
                     android:textDirection="ltr" />
             </com.google.android.material.textfield.TextInputLayout>
 
