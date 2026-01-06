@@ -1,39 +1,38 @@
 package com.matchpointplus.models;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
 public class User {
+    @SerializedName("id")
+    @Expose(serialize = false)
     private String id;
-    private String name;
-    private int age;
-    private String location;
-    private String bio;
-    private List<String> interests;
 
-    @SerializedName("profilePicture")
+    @SerializedName("email")
+    private String email;
+
+    @SerializedName("password")
+    private String password;
+
+    @SerializedName("profile_picture")
     private String profilePicture;
-    
+
+    @SerializedName("pictures")
     private List<String> pictures;
 
-    public User(String id, String name, int age, String location, String bio, List<String> interests, String profilePicture, List<String> pictures) {
-        this.id = id;
-        this.name = name;
-        this.age = age;
-        this.location = location;
-        this.bio = bio;
-        this.interests = interests;
-        this.profilePicture = profilePicture;
-        this.pictures = pictures;
+    public User(String email, String password) {
+        this.email = email;
+        this.password = password;
     }
 
-    // Getters and Setters
     public String getId() { return id; }
-    public String getName() { return name; }
-    public int getAge() { return age; }
-    public String getLocation() { return location; }
-    public String getBio() { return bio; }
-    public List<String> getInterests() { return interests; }
+    public String getEmail() { return email; }
+    public String getPassword() { return password; }
     public String getProfilePicture() { return profilePicture; }
     public List<String> getPictures() { return pictures; }
+
+    public void setProfilePicture(String profilePicture) {
+        this.profilePicture = profilePicture;
+    }
 }
