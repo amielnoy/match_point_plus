@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_profile"
+        android:icon="@drawable/ic_location"
+        android:title="הפרופיל שלי" />
+    <item
+        android:id="@+id/nav_matches"
+        android:icon="@drawable/ic_heart"
+        android:title="שידוכים" />
+    <item
+        android:id="@+id/nav_messages"
+        android:icon="@drawable/ic_sparkle"
+        android:title="הודעות" />
+    <divider />
+    <item
+        android:id="@+id/nav_settings"
+        android:title="הגדרות" />
+    <item
+        android:id="@+id/nav_logout"
+        android:title="התנתק" />
+</menu>
