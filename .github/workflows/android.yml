@@ -19,10 +19,11 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
-    # If gradlew is missing, this step will fail gracefully and we can debug.
-    # We use the wrapper in the root directory.
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew || echo "gradlew not found at root"
+    # Generate the gradlew script from the wrapper JAR
+    - name: Generate Gradle Wrapper
+      run: |
+        java -cp gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain wrapper
+        chmod +x gradlew
 
     - name: Build with Gradle
       run: ./gradlew :app:assembleDebug
