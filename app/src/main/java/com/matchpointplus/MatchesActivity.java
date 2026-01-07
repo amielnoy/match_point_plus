@@ -8,12 +8,13 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.widget.ViewPager2;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.matchpointplus.adapters.MatchAdapter;
-import com.matchpointplus.data.SupabaseManager;
 import com.matchpointplus.models.Match;
+import com.matchpointplus.viewmodels.MatchesViewModel;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,11 +25,14 @@ public class MatchesActivity extends AppCompatActivity {
     private MatchAdapter adapter;
     private List<Match> matches = new ArrayList<>();
     private DrawerLayout drawerLayout;
+    private MatchesViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_matches);
+
+        viewModel = new ViewModelProvider(this).get(MatchesViewModel.class);
 
         drawerLayout = findViewById(R.id.drawerLayout);
         NavigationView navigationView = findViewById(R.id.navigationView);
@@ -58,47 +62,29 @@ public class MatchesActivity extends AppCompatActivity {
         passButton.setOnClickListener(v -> handleSwipe());
         likeButton.setOnClickListener(v -> handleSwipe());
 
-        // Now we only fetch from Supabase, no more seeding needed
-        fetchFromSupabase();
+        observeViewModel();
     }
 
-    private void fetchFromSupabase() {
-        SupabaseManager.fetchMatches(new SupabaseManager.SupabaseCallback<List<Match>>() {
-            @Override
-            public void onSuccess(List<Match> result) {
-                runOnUiThread(() -> {
-                    if (result != null && !result.isEmpty()) {
-                        matches.clear();
-                        matches.addAll(result);
-                        adapter.notifyDataSetChanged();
-                        Log.d(TAG, "Successfully fetched " + result.size() + " matches");
-                    } else {
-                        Log.w(TAG, "Fetched empty match list from Supabase");
-                        Toast.makeText(MatchesActivity.this, "No matches found in database", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-
-            @Override
-            public void onError(Exception e) {
-                Log.e(TAG, "Error fetching matches: " + e.getMessage());
-                runOnUiThread(() -> Toast.makeText(MatchesActivity.this, "Network error fetching profiles", Toast.LENGTH_SHORT).show());
+    private void observeViewModel() {
+        viewModel.getMatches().observe(this, result -> {
+            if (result != null && !result.isEmpty()) {
+                matches.clear();
+                matches.addAll(result);
+                adapter.notifyDataSetChanged();
+                Log.d(TAG, "Successfully fetched " + result.size() + " matches");
+            } else if (result == null) {
+                Log.e(TAG, "Error fetching matches");
+                Toast.makeText(this, "Network error fetching profiles", Toast.LENGTH_SHORT).show();
+            } else {
+                Log.w(TAG, "Fetched empty match list");
+                Toast.makeText(this, "No matches found", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void syncAndLogout() {
-        SupabaseManager.saveMatches(matches, new SupabaseManager.SupabaseCallback<Void>() {
-            @Override
-            public void onSuccess(Void result) {
-                navigateToLogin();
-            }
-
-            @Override
-            public void onError(Exception e) {
-                navigateToLogin(); 
-            }
-        });
+        viewModel.syncMatches(matches);
+        navigateToLogin();
     }
 
     private void navigateToLogin() {
@@ -112,7 +98,7 @@ public class MatchesActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         if (matches != null && !matches.isEmpty()) {
-            SupabaseManager.saveMatches(matches, null);
+            viewModel.syncMatches(matches);
         }
     }
 
