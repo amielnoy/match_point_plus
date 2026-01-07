@@ -3,6 +3,9 @@
 /local.properties
 .idea/
 .idea/*
+**/.idea/
+**/.idea/*
+deviceStreaming.xml
 build/
 /build
 .cxx
