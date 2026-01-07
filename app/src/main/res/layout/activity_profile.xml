@@ -16,23 +16,27 @@
 
     <ImageView
         android:id="@+id/profileImageView"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
         android:layout_marginTop="32dp"
+        android:scaleType="centerCrop"
+        android:background="#EEEEEE"
         android:src="@mipmap/ic_launcher_round" />
 
     <TextView
+        android:id="@+id/userNameTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="המשתמש שלי"
+        android:text="טוען..."
         android:textSize="24sp"
         android:textStyle="bold" />
 
     <TextView
+        android:id="@+id/userEmailTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="תל אביב, ישראל"
+        android:text="דואל"
         android:textColor="#666666" />
 
     <com.google.android.material.button.MaterialButton
@@ -40,6 +44,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:text="ערוך פרופיל" />
+        android:text="צלם תמונת פרופיל חדשה" />
 
 </LinearLayout>
