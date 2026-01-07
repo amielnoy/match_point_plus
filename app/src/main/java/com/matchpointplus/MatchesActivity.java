@@ -2,6 +2,7 @@ package com.matchpointplus;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -10,18 +11,18 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.viewpager2.widget.ViewPager2;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
-import com.matchpointplus.adapters.UserAdapter;
-import com.matchpointplus.data.MockData;
+import com.matchpointplus.adapters.MatchAdapter;
 import com.matchpointplus.data.SupabaseManager;
-import com.matchpointplus.models.User;
+import com.matchpointplus.models.Match;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MatchesActivity extends AppCompatActivity {
 
+    private static final String TAG = "MatchesActivity";
     private ViewPager2 viewPager;
-    private UserAdapter adapter;
-    private List<User> users = new ArrayList<>();
+    private MatchAdapter adapter;
+    private List<Match> matches = new ArrayList<>();
     private DrawerLayout drawerLayout;
 
     @Override
@@ -33,7 +34,7 @@ public class MatchesActivity extends AppCompatActivity {
         NavigationView navigationView = findViewById(R.id.navigationView);
         viewPager = findViewById(R.id.viewPager);
         
-        adapter = new UserAdapter(users, user -> showAiSummaryBottomSheet(user));
+        adapter = new MatchAdapter(matches, match -> showAiSummaryBottomSheet(match));
         viewPager.setAdapter(adapter);
 
         findViewById(R.id.menuButton).setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
@@ -57,36 +58,37 @@ public class MatchesActivity extends AppCompatActivity {
         passButton.setOnClickListener(v -> handleSwipe());
         likeButton.setOnClickListener(v -> handleSwipe());
 
-        seedAndFetchUsers();
+        // Now we only fetch from Supabase, no more seeding needed
+        fetchFromSupabase();
     }
 
-    private void seedAndFetchUsers() {
-        // Seed mock data using the bulk save method
-        SupabaseManager.saveUsers(MockData.getUsers(), null);
-
-        // Fetch actual data from Supabase
-        SupabaseManager.fetchUsers(new SupabaseManager.SupabaseCallback<List<User>>() {
+    private void fetchFromSupabase() {
+        SupabaseManager.fetchMatches(new SupabaseManager.SupabaseCallback<List<Match>>() {
             @Override
-            public void onSuccess(List<User> result) {
+            public void onSuccess(List<Match> result) {
                 runOnUiThread(() -> {
                     if (result != null && !result.isEmpty()) {
-                        users.clear();
-                        users.addAll(result);
+                        matches.clear();
+                        matches.addAll(result);
                         adapter.notifyDataSetChanged();
+                        Log.d(TAG, "Successfully fetched " + result.size() + " matches");
+                    } else {
+                        Log.w(TAG, "Fetched empty match list from Supabase");
+                        Toast.makeText(MatchesActivity.this, "No matches found in database", Toast.LENGTH_SHORT).show();
                     }
                 });
             }
 
             @Override
             public void onError(Exception e) {
-                runOnUiThread(() -> Toast.makeText(MatchesActivity.this, "Error fetching profiles", Toast.LENGTH_SHORT).show());
+                Log.e(TAG, "Error fetching matches: " + e.getMessage());
+                runOnUiThread(() -> Toast.makeText(MatchesActivity.this, "Network error fetching profiles", Toast.LENGTH_SHORT).show());
             }
         });
     }
 
     private void syncAndLogout() {
-        // Sync before logging out
-        SupabaseManager.saveUsers(users, new SupabaseManager.SupabaseCallback<Void>() {
+        SupabaseManager.saveMatches(matches, new SupabaseManager.SupabaseCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
                 navigateToLogin();
@@ -94,7 +96,7 @@ public class MatchesActivity extends AppCompatActivity {
 
             @Override
             public void onError(Exception e) {
-                navigateToLogin(); // Still logout even if sync fails
+                navigateToLogin(); 
             }
         });
     }
@@ -109,15 +111,14 @@ public class MatchesActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        // Automatically sync data when the app is backgrounded
-        if (users != null && !users.isEmpty()) {
-            SupabaseManager.saveUsers(users, null);
+        if (matches != null && !matches.isEmpty()) {
+            SupabaseManager.saveMatches(matches, null);
         }
     }
 
     private void handleSwipe() {
         int currentItem = viewPager.getCurrentItem();
-        if (currentItem < users.size() - 1) {
+        if (currentItem < matches.size() - 1) {
             viewPager.setCurrentItem(currentItem + 1, true);
         } else {
             Toast.makeText(this, "No more matches near you", Toast.LENGTH_SHORT).show();
@@ -126,8 +127,8 @@ public class MatchesActivity extends AppCompatActivity {
         }
     }
 
-    private void showAiSummaryBottomSheet(User user) {
-        AiSummaryBottomSheet bottomSheet = AiSummaryBottomSheet.newInstance(user);
+    private void showAiSummaryBottomSheet(Match match) {
+        AiSummaryBottomSheet bottomSheet = AiSummaryBottomSheet.newInstance(match);
         bottomSheet.show(getSupportFragmentManager(), "AiSummaryBottomSheet");
     }
 }
