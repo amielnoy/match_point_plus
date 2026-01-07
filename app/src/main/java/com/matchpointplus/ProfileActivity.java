@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,6 +19,8 @@ public class ProfileActivity extends AppCompatActivity {
 
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private ImageView profileImageView;
+    private TextView userNameTextView;
+    private TextView userEmailTextView;
     private ProfileViewModel viewModel;
 
     @Override
@@ -31,7 +34,7 @@ public class ProfileActivity extends AppCompatActivity {
         initViews();
         setupObservers();
         
-        loadCurrentProfile();
+        displayUserData();
     }
 
     private void setupToolbar() {
@@ -44,25 +47,34 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void initViews() {
         profileImageView = findViewById(R.id.profileImageView);
+        userNameTextView = findViewById(R.id.userNameTextView);
+        userEmailTextView = findViewById(R.id.userEmailTextView);
         findViewById(R.id.editProfileButton).setOnClickListener(v -> dispatchTakePictureIntent());
     }
 
     private void setupObservers() {
         viewModel.getUpdateStatus().observe(this, success -> {
             if (Boolean.TRUE.equals(success)) {
-                Toast.makeText(this, "Profile updated successfully!", Toast.LENGTH_SHORT).show();
-                loadCurrentProfile();
+                Toast.makeText(this, "הפרופיל עודכן בהצלחה!", Toast.LENGTH_SHORT).show();
+                displayUserData(); // רענון המידע המוצג
             }
         });
     }
 
-    private void loadCurrentProfile() {
+    private void displayUserData() {
         User currentUser = viewModel.getCurrentUser();
-        if (currentUser != null && currentUser.getProfilePicture() != null) {
-            Glide.with(this)
-                    .load(currentUser.getProfilePicture())
-                    .placeholder(R.mipmap.ic_launcher_round)
-                    .into(profileImageView);
+        if (currentUser != null) {
+            userNameTextView.setText("שלום, " + currentUser.getEmail().split("@")[0]);
+            userEmailTextView.setText(currentUser.getEmail());
+            
+            if (currentUser.getProfilePicture() != null && !currentUser.getProfilePicture().isEmpty()) {
+                Glide.with(this)
+                        .load(currentUser.getProfilePicture())
+                        .placeholder(R.mipmap.ic_launcher_round)
+                        .error(R.mipmap.ic_launcher_round)
+                        .circleCrop()
+                        .into(profileImageView);
+            }
         }
     }
 
@@ -89,6 +101,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void handleImageUpload(Bitmap bitmap) {
+        Toast.makeText(this, "מעלה תמונה...", Toast.LENGTH_SHORT).show();
         viewModel.uploadImage(bitmap).observe(this, publicUrl -> {
             if (publicUrl != null) {
                 User user = viewModel.getCurrentUser();
@@ -96,7 +109,7 @@ public class ProfileActivity extends AppCompatActivity {
                     viewModel.updateProfilePicture(user.getId(), publicUrl);
                 }
             } else {
-                Toast.makeText(this, "Upload failed", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "העלאת התמונה נכשלה", Toast.LENGTH_SHORT).show();
             }
         });
     }
