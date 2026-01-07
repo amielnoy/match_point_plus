@@ -8,9 +8,7 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
     
@@ -21,13 +19,13 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
+    # If gradlew is missing, this step will fail gracefully and we can debug.
+    # We use the wrapper in the root directory.
     - name: Grant execute permission for gradlew
-      run: chmod +x app/gradlew
+      run: chmod +x gradlew || echo "gradlew not found at root"
 
     - name: Build with Gradle
-      run: ./gradlew assembleDebug
-      working-directory: ./app
+      run: ./gradlew :app:assembleDebug
 
     - name: Run unit tests
-      run: ./gradlew test
-      working-directory: ./app
+      run: ./gradlew :app:test
