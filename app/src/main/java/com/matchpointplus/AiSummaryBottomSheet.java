@@ -9,18 +9,18 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
-import com.matchpointplus.models.User;
+import com.matchpointplus.models.Match;
 
 public class AiSummaryBottomSheet extends BottomSheetDialogFragment {
 
     private static final String ARG_USER_NAME = "user_name";
     private static final String ARG_USER_ID = "user_id";
 
-    public static AiSummaryBottomSheet newInstance(User user) {
+    public static AiSummaryBottomSheet newInstance(Match match) {
         AiSummaryBottomSheet fragment = new AiSummaryBottomSheet();
         Bundle args = new Bundle();
-        args.putString(ARG_USER_NAME, user.getName());
-        args.putString(ARG_USER_ID, user.getId());
+        args.putString(ARG_USER_NAME, match.getName());
+        args.putString(ARG_USER_ID, match.getId());
         fragment.setArguments(args);
         return fragment;
     }
