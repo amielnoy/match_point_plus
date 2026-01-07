@@ -6,7 +6,6 @@ import java.util.List;
 
 public class User {
     @SerializedName("id")
-    @Expose(serialize = false)
     private String id;
 
     @SerializedName("email")
