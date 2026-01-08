@@ -1,4 +1,4 @@
-package com.matchpointplus;
+package com.matchpointplus.views;
 
 import android.os.Bundle;
 import android.widget.Button;
@@ -7,6 +7,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
+import com.matchpointplus.R;
 import com.matchpointplus.viewmodels.SignUpViewModel;
 
 public class SignUpActivity extends AppCompatActivity {
@@ -43,7 +44,7 @@ public class SignUpActivity extends AppCompatActivity {
         viewModel.signUp(email, password).observe(this, success -> {
             if (Boolean.TRUE.equals(success)) {
                 Toast.makeText(SignUpActivity.this, "החשבון נוצר בהצלחה! ניתן להתחבר.", Toast.LENGTH_LONG).show();
-                finish(); // חזרה למסך התחברות
+                finish();
             } else {
                 Toast.makeText(SignUpActivity.this, "ההרשמה נכשלה. ייתכן והאימייל כבר קיים.", Toast.LENGTH_SHORT).show();
             }
