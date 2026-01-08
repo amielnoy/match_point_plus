@@ -1,10 +1,53 @@
 <resources>
-    <string name="app_name">MatchPointPlus</string>
+    <string name="app_name">שוגר מיט</string>
+    <string name="welcome_title">ברוכים הבאים לשוגר מיט</string>
+    <string name="welcome_subtitle">מקום בטוח ומכבד להכרויות בגובה העיניים.</string>
     <string name="login">כניסה</string>
+    <string name="signup">הרשמה</string>
     <string name="email_hint">אימייל</string>
     <string name="password_hint">סיסמה</string>
+    
+    <!-- Matches Screen -->
     <string name="no_matches">זה הכל לעכשיו!</string>
-    <string name="no_matches_desc">חזור/י מאוחר יותר למציאת התאמות חדשות.</string>
-    <string name="ai_summary_title">ניצוצות של תאימות</string>
-    <string name="ai_summary_desc">תובנות מבוססות בינה מלאכותית על החיבור הפוטנציאלי שלך עם %1$s.</string>
+    <string name="no_matches_desc">חזרו מאוחר יותר למציאת חברים חדשים.</string>
+    
+    <!-- AI Bottom Sheet -->
+    <string name="ai_summary_title">תובנות שוגר מיט ✨</string>
+    <string name="ai_summary_desc">גילינו כמה דברים מעניינים שיכולים לחבר בינך לבין %1$s.</string>
+    <string name="start_chat_ai">התחל שיחה על סמך התובנות</string>
+    
+    <!-- Profile Screen -->
+    <string name="my_profile">הפרופיל שלי</string>
+    <string name="edit_profile">ערוך פרופיל</string>
+    <string name="take_photo">צלם תמונת פרופיל חדשה</string>
+    <string name="profile_updated">הפרופיל עודכן בהצלחה!</string>
+    
+    <!-- Navigation Menu -->
+    <string name="menu_matches">שידוכים</string>
+    <string name="menu_search">חיפוש שידוכים</string>
+    <string name="menu_messages">הודעות</string>
+    <string name="menu_settings">הגדרות</string>
+    <string name="menu_logout">התנתקות</string>
+    
+    <!-- Chat -->
+    <string name="type_message">הקלד הודעה...</string>
+    <string name="chat_history_error">טעינת היסטוריית ההודעות נכשלה</string>
+    
+    <!-- Categories -->
+    <string name="interests_title">תחומי עניין</string>
+    <string name="interest_sports">ספורט</string>
+    <string name="interest_music">מוזיקה</string>
+    <string name="interest_art">אמנות</string>
+    <string name="interest_studies">לימודים</string>
+
+    <!-- Search Screen -->
+    <string name="search_hint">חיפוש מועמדים...</string>
+    <string name="filters_label">מסננים</string>
+    <string name="age_label">גיל</string>
+    <string name="found_matches_format">נמצאו %1$d התאמות</string>
+    <string name="filter_male">זכר</string>
+    <string name="filter_funny">מצחיק</string>
+    <string name="filter_experienced">מנוסה</string>
+    <string name="filter_animal_lover">אוהב חיות</string>
+    <string name="number_of_filtered_matches">נמצאו 0 התאמות</string>
 </resources>
