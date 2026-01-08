@@ -1,4 +1,4 @@
-package com.matchpointplus;
+package com.matchpointplus.views;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
 import com.bumptech.glide.Glide;
+import com.matchpointplus.R;
 import com.matchpointplus.models.User;
 import com.matchpointplus.viewmodels.ProfileViewModel;
 
@@ -56,7 +57,7 @@ public class ProfileActivity extends AppCompatActivity {
         viewModel.getUpdateStatus().observe(this, success -> {
             if (Boolean.TRUE.equals(success)) {
                 Toast.makeText(this, "הפרופיל עודכן בהצלחה!", Toast.LENGTH_SHORT).show();
-                displayUserData(); // רענון המידע המוצג
+                displayUserData();
             }
         });
     }

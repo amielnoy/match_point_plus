@@ -1,5 +1,6 @@
 package com.matchpointplus.adapters;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,7 @@ import java.util.List;
 
 public class MatchAdapter extends RecyclerView.Adapter<MatchAdapter.MatchViewHolder> {
 
+    private static final String TAG = "MatchAdapter";
     private List<Match> matches;
     private OnAiSummaryClickListener aiSummaryClickListener;
 
@@ -28,6 +30,11 @@ public class MatchAdapter extends RecyclerView.Adapter<MatchAdapter.MatchViewHol
     public MatchAdapter(List<Match> matches, OnAiSummaryClickListener listener) {
         this.matches = matches;
         this.aiSummaryClickListener = listener;
+    }
+
+    public void setMatches(List<Match> matches) {
+        this.matches = matches;
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -45,7 +52,7 @@ public class MatchAdapter extends RecyclerView.Adapter<MatchAdapter.MatchViewHol
 
     @Override
     public int getItemCount() {
-        return matches.size();
+        return matches != null ? matches.size() : 0;
     }
 
     static class MatchViewHolder extends RecyclerView.ViewHolder {
@@ -71,26 +78,40 @@ public class MatchAdapter extends RecyclerView.Adapter<MatchAdapter.MatchViewHol
             locationTextView.setText(match.getLocation());
             bioTextView.setText(match.getBio());
 
-            Glide.with(itemView.getContext())
-                    .load(match.getProfilePicture())
-                    .into(profileImageView);
+            String imageUrl = match.getProfilePicture();
+            Log.d(TAG, "Attempting to load image for: " + match.getName() + " URL: " + imageUrl);
 
-            interestsChipGroup.removeAllViews();
-            for (String interest : match.getInterests()) {
-                Chip chip = new Chip(itemView.getContext());
-                chip.setText(interest);
-                chip.setChipBackgroundColorResource(android.R.color.transparent);
-                chip.setTextColor(ContextCompat.getColor(itemView.getContext(), android.R.color.white));
-                chip.setChipStrokeWidth(1f);
-                chip.setChipStrokeColorResource(android.R.color.white);
-                interestsChipGroup.addView(chip);
+            if (imageUrl != null && !imageUrl.isEmpty()) {
+                Glide.with(itemView.getContext())
+                        .load(imageUrl)
+                        .placeholder(R.mipmap.ic_launcher_round)
+                        .error(R.mipmap.ic_launcher_round)
+                        .centerCrop()
+                        .into(profileImageView);
+            } else {
+                profileImageView.setImageResource(R.mipmap.ic_launcher_round);
             }
 
-            aiSummaryButton.setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onAiSummaryClick(match);
+            interestsChipGroup.removeAllViews();
+            if (match.getInterests() != null) {
+                for (String interest : match.getInterests()) {
+                    Chip chip = new Chip(itemView.getContext());
+                    chip.setText(interest);
+                    chip.setChipBackgroundColorResource(android.R.color.transparent);
+                    chip.setTextColor(ContextCompat.getColor(itemView.getContext(), android.R.color.white));
+                    chip.setChipStrokeWidth(1f);
+                    chip.setChipStrokeColorResource(android.R.color.white);
+                    interestsChipGroup.addView(chip);
                 }
-            });
+            }
+
+            if (aiSummaryButton != null) {
+                aiSummaryButton.setOnClickListener(v -> {
+                    if (listener != null) {
+                        listener.onAiSummaryClick(match);
+                    }
+                });
+            }
         }
     }
 }

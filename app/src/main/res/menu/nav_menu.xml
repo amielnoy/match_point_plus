@@ -3,20 +3,28 @@
     <item
         android:id="@+id/nav_profile"
         android:icon="@drawable/ic_location"
-        android:title="הפרופיל שלי" />
+        android:title="@string/my_profile" />
     <item
         android:id="@+id/nav_matches"
         android:icon="@drawable/ic_heart"
-        android:title="שידוכים" />
+        android:title="@string/menu_matches" />
+    <item
+        android:id="@+id/nav_search"
+        android:icon="@android:drawable/ic_menu_search"
+        android:title="חיפוש שידוכים" />
     <item
         android:id="@+id/nav_messages"
         android:icon="@drawable/ic_sparkle"
-        android:title="הודעות" />
+        android:title="@string/menu_messages" />
+    <item
+        android:id="@+id/nav_admin"
+        android:icon="@android:drawable/ic_lock_lock"
+        android:title="פאנל ניהול" />
     <divider />
     <item
         android:id="@+id/nav_settings"
-        android:title="הגדרות" />
+        android:title="@string/menu_settings" />
     <item
         android:id="@+id/nav_logout"
-        android:title="התנתק" />
+        android:title="@string/menu_logout" />
 </menu>

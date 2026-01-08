@@ -1,4 +1,4 @@
-package com.matchpointplus;
+package com.matchpointplus.views;
 
 import android.os.Bundle;
 import android.widget.EditText;
@@ -7,6 +7,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.matchpointplus.R;
 import com.matchpointplus.adapters.MessageAdapter;
 import com.matchpointplus.models.Message;
 import com.matchpointplus.viewmodels.ChatViewModel;

@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.matchpointplus.models.Match;
+import com.matchpointplus.views.ChatActivity;
 
 public class AiSummaryBottomSheet extends BottomSheetDialogFragment {
 

@@ -22,11 +22,15 @@ public class Match {
     @SerializedName("interests")
     private List<String> interests;
 
-    @SerializedName("profilePicture")
+    // Support both snake_case and camelCase from Supabase
+    @SerializedName(value = "profile_picture", alternate = {"profilePicture"})
     private String profilePicture;
     
     @SerializedName("pictures")
     private List<String> pictures;
+
+    @SerializedName("is_selected")
+    private boolean isSelected;
 
     public Match(String id, String name, int age, String location, String bio, List<String> interests, String profilePicture, List<String> pictures) {
         this.id = id;
@@ -37,6 +41,7 @@ public class Match {
         this.interests = interests;
         this.profilePicture = profilePicture;
         this.pictures = pictures;
+        this.isSelected = false;
     }
 
     // Getters
@@ -48,4 +53,7 @@ public class Match {
     public List<String> getInterests() { return interests; }
     public String getProfilePicture() { return profilePicture; }
     public List<String> getPictures() { return pictures; }
+    public boolean isSelected() { return isSelected; }
+
+    public void setSelected(boolean selected) { isSelected = selected; }
 }
