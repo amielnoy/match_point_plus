@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel;
 import com.matchpointplus.data.SupabaseManager;
 import com.matchpointplus.models.Match;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -90,8 +89,8 @@ public class SearchViewModel extends ViewModel {
         filteredMatches.postValue(filteredList);
     }
 
-    public void addMatch(Match match) {
-        match.setSelected(true);
-        SupabaseManager.saveMatches(Collections.singletonList(match), null);
+    public void addMatch(Match match, SupabaseManager.SupabaseCallback<Void> callback) {
+        // Optimized: Only update the selection status via PATCH
+        SupabaseManager.updateMatchSelection(match.getId(), true, callback);
     }
 }

@@ -21,6 +21,8 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.slider.RangeSlider;
 import com.matchpointplus.R;
 import com.matchpointplus.adapters.SearchMatchAdapter;
+import com.matchpointplus.data.SupabaseManager;
+import com.matchpointplus.models.Match;
 import com.matchpointplus.viewmodels.SearchViewModel;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +59,19 @@ public class SearchMatchesActivity extends AppCompatActivity {
         ageRangeDisplayTextView = findViewById(R.id.ageRangeDisplayTextView);
         RecyclerView recyclerView = findViewById(R.id.searchRecyclerView);
         
-        adapter = new SearchMatchAdapter(new ArrayList<>(), match -> viewModel.addMatch(match));
+        adapter = new SearchMatchAdapter(new ArrayList<>(), match -> {
+            viewModel.addMatch(match, new SupabaseManager.SupabaseCallback<Void>() {
+                @Override
+                public void onSuccess(Void result) {
+                    runOnUiThread(() -> Toast.makeText(SearchMatchesActivity.this, match.getName() + " נוסף לרשימה שלך!", Toast.LENGTH_SHORT).show());
+                }
+
+                @Override
+                public void onError(Exception e) {
+                    runOnUiThread(() -> Toast.makeText(SearchMatchesActivity.this, "הוספה נכשלה: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                }
+            });
+        });
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
     }
@@ -131,9 +145,6 @@ public class SearchMatchesActivity extends AppCompatActivity {
                 Toast.makeText(this, "Error loading data", Toast.LENGTH_SHORT).show();
             }
         });
-        
-        // Update the age display text whenever it changes in ViewModel
-        // Note: You could add more LiveData here for age range and query
     }
 
     private void navigateToLogin() {
