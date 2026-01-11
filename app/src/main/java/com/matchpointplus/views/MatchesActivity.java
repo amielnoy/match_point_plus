@@ -3,15 +3,13 @@ package com.matchpointplus.views;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.TextView;
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.viewpager2.widget.ViewPager2;
-import com.google.android.material.navigation.NavigationView;
 import com.matchpointplus.R;
 import com.matchpointplus.adapters.MatchAdapter;
+import com.matchpointplus.databinding.ActivityMatchesBinding;
 import com.matchpointplus.models.Match;
 import com.matchpointplus.viewmodels.MatchesViewModel;
 import com.matchpointplus.AiSummaryBottomSheet;
@@ -20,17 +18,16 @@ import java.util.List;
 
 public class MatchesActivity extends AppCompatActivity {
 
+    private ActivityMatchesBinding binding;
     private MatchesViewModel viewModel;
     private MatchAdapter adapter;
-    private DrawerLayout drawerLayout;
-    private ViewPager2 viewPager;
-    private TextView emptyStateTextView;
     private final List<Match> matches = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_matches);
+        binding = ActivityMatchesBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         viewModel = new ViewModelProvider(this).get(MatchesViewModel.class);
 
@@ -47,29 +44,18 @@ public class MatchesActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        drawerLayout = findViewById(R.id.drawerLayout);
-        viewPager = findViewById(R.id.viewPager);
-        emptyStateTextView = findViewById(R.id.emptyStateTextView);
-        
         adapter = new MatchAdapter(matches, this::showAiSummaryBottomSheet);
-        if (viewPager != null) {
-            viewPager.setAdapter(adapter);
-        }
+        binding.viewPager.setAdapter(adapter);
     }
 
     private void setupNavigation() {
-        findViewById(R.id.menuButton).setOnClickListener(v -> {
-            if (drawerLayout != null) drawerLayout.openDrawer(GravityCompat.START);
-        });
+        binding.menuButton.setOnClickListener(v -> binding.drawerLayout.openDrawer(GravityCompat.START));
         
-        NavigationView navigationView = findViewById(R.id.navigationView);
-        if (navigationView != null) {
-            navigationView.setNavigationItemSelectedListener(item -> {
-                handleNavigation(item.getItemId());
-                if (drawerLayout != null) drawerLayout.closeDrawer(GravityCompat.START);
-                return true;
-            });
-        }
+        binding.navigationView.setNavigationItemSelectedListener(item -> {
+            handleNavigation(item.getItemId());
+            binding.drawerLayout.closeDrawer(GravityCompat.START);
+            return true;
+        });
     }
 
     private void handleNavigation(int itemId) {
@@ -89,10 +75,7 @@ public class MatchesActivity extends AppCompatActivity {
     }
 
     private void setupActionButtons() {
-        View passButton = findViewById(R.id.passButton);
-        if (passButton != null) {
-            passButton.setOnClickListener(v -> handlePass());
-        }
+        binding.passButton.setOnClickListener(v -> handlePass());
     }
 
     private void setupObservers() {
@@ -100,28 +83,28 @@ public class MatchesActivity extends AppCompatActivity {
             matches.clear();
             if (result != null && !result.isEmpty()) {
                 matches.addAll(result);
-                if (adapter != null) adapter.notifyDataSetChanged();
+                adapter.notifyDataSetChanged();
                 toggleEmptyState(false);
             } else {
-                if (adapter != null) adapter.notifyDataSetChanged();
+                adapter.notifyDataSetChanged();
                 toggleEmptyState(true);
             }
         });
     }
 
     private void toggleEmptyState(boolean isEmpty) {
-        if (emptyStateTextView != null) emptyStateTextView.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
-        if (viewPager != null) viewPager.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
+        binding.emptyStateTextView.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
+        binding.viewPager.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
     }
 
     private void handlePass() {
-        if (viewPager == null || matches == null || matches.isEmpty()) {
-            return;
-        }
-        int currentItem = viewPager.getCurrentItem();
+        if (matches.isEmpty()) return;
+        
+        int currentItem = binding.viewPager.getCurrentItem();
         if (currentItem >= 0 && currentItem < matches.size()) {
             Match matchToRemove = matches.get(currentItem);
             viewModel.removeMatch(matchToRemove);
+            Toast.makeText(this, matchToRemove.getName() + " הוסר מהרשימה", Toast.LENGTH_SHORT).show();
         }
     }
 
