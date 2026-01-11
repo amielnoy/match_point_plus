@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <application
         android:allowBackup="true"
@@ -13,6 +14,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MatchPointPlus"
         android:usesCleartextTraffic="true">
+        
         <activity
             android:name=".views.LoginActivity"
             android:exported="true">
@@ -21,14 +23,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
         <activity android:name=".views.MatchesActivity" />
-        <activity android:name=".views.ChatActivity" 
-            android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".views.ChatActivity" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".views.ProfileActivity" />
         <activity android:name=".views.SettingsActivity" />
         <activity android:name=".views.SignUpActivity" />
         <activity android:name=".views.SearchMatchesActivity" />
         <activity android:name=".views.AdminActivity" />
+        <activity android:name=".views.AddCandidateActivity" />
+        
     </application>
 
 </manifest>
