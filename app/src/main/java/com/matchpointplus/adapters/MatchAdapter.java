@@ -79,8 +79,6 @@ public class MatchAdapter extends RecyclerView.Adapter<MatchAdapter.MatchViewHol
             bioTextView.setText(match.getBio());
 
             String imageUrl = match.getProfilePicture();
-            Log.d(TAG, "Attempting to load image for: " + match.getName() + " URL: " + imageUrl);
-
             if (imageUrl != null && !imageUrl.isEmpty()) {
                 Glide.with(itemView.getContext())
                         .load(imageUrl)
@@ -88,8 +86,6 @@ public class MatchAdapter extends RecyclerView.Adapter<MatchAdapter.MatchViewHol
                         .error(R.mipmap.ic_launcher_round)
                         .centerCrop()
                         .into(profileImageView);
-            } else {
-                profileImageView.setImageResource(R.mipmap.ic_launcher_round);
             }
 
             interestsChipGroup.removeAllViews();
@@ -97,10 +93,11 @@ public class MatchAdapter extends RecyclerView.Adapter<MatchAdapter.MatchViewHol
                 for (String interest : match.getInterests()) {
                     Chip chip = new Chip(itemView.getContext());
                     chip.setText(interest);
-                    chip.setChipBackgroundColorResource(android.R.color.transparent);
-                    chip.setTextColor(ContextCompat.getColor(itemView.getContext(), android.R.color.white));
-                    chip.setChipStrokeWidth(1f);
-                    chip.setChipStrokeColorResource(android.R.color.white);
+                    // שינוי לצבע ורוד כהה יותר
+                    chip.setChipBackgroundColorResource(android.R.color.white);
+                    chip.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.primary_dark));
+                    chip.setChipStrokeWidth(2f);
+                    chip.setChipStrokeColorResource(R.color.primary_dark);
                     interestsChipGroup.addView(chip);
                 }
             }
