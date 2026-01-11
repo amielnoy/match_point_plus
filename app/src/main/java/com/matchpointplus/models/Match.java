@@ -22,8 +22,8 @@ public class Match {
     @SerializedName("interests")
     private List<String> interests;
 
-    // Support both snake_case and camelCase from Supabase
-    @SerializedName(value = "profile_picture", alternate = {"profilePicture"})
+    // Adjusted to match your specific DB column name
+    @SerializedName("profilePicture") 
     private String profilePicture;
     
     @SerializedName("pictures")

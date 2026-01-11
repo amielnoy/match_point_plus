@@ -43,13 +43,23 @@ public class SupabaseManager {
         bitmap.compress(Bitmap.CompressFormat.JPEG, 80, stream);
         byte[] byteArray = stream.toByteArray();
 
-        String fileName = "profile_" + UUID.randomUUID().toString() + ".jpg";
+        String fileName = "profile_" + System.currentTimeMillis() + ".jpg";
         String bucketName = "avatars"; 
-        String url = SUPABASE_URL + "/storage/v1/object/" + bucketName + "/" + fileName;
+        
+        // בניית URL תקנית באמצעות HttpUrl
+        HttpUrl uploadUrl = HttpUrl.parse(SUPABASE_URL).newBuilder()
+                .addPathSegment("storage")
+                .addPathSegment("v1")
+                .addPathSegment("object")
+                .addPathSegment(bucketName)
+                .addPathSegment(fileName)
+                .build();
+
+        Log.d(TAG, "Uploading to: " + uploadUrl.toString());
 
         RequestBody body = RequestBody.create(byteArray, MediaType.parse("image/jpeg"));
         Request request = new Request.Builder()
-                .url(url)
+                .url(uploadUrl)
                 .addHeader("apikey", SUPABASE_KEY)
                 .addHeader("Authorization", "Bearer " + SUPABASE_KEY)
                 .addHeader("Content-Type", "image/jpeg")
@@ -59,16 +69,20 @@ public class SupabaseManager {
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                callback.onError(e);
+                Log.e(TAG, "Network failure: " + e.getMessage());
+                callback.onError(new Exception("לא ניתן ליצור קשר עם השרת. וודא שהאינטרנט פעיל."));
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
+                    // בניית ה-URL הציבורי באותו אופן
                     String publicUrl = SUPABASE_URL + "/storage/v1/object/public/" + bucketName + "/" + fileName;
                     callback.onSuccess(publicUrl);
                 } else {
-                    callback.onError(new Exception("Upload failed: " + response.code()));
+                    String errorBody = response.body() != null ? response.body().string() : "";
+                    Log.e(TAG, "Server error (" + response.code() + "): " + errorBody);
+                    callback.onError(new Exception("העלאה נכשלה: " + response.code()));
                 }
                 response.close();
             }
@@ -116,7 +130,6 @@ public class SupabaseManager {
 
     public static void signUp(String email, String password, SupabaseCallback<Void> callback) {
         User newUser = new User(email, password);
-        // יצירת ID ייחודי לכל משתמש חדש
         newUser.setId(UUID.randomUUID().toString());
         List<User> list = Collections.singletonList(newUser);
         sendPostRequest("/rest/v1/users", gson.toJson(list), true, callback);
@@ -137,7 +150,7 @@ public class SupabaseManager {
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                if (callback != null) callback.onError(e);
+                callback.onError(e);
             }
 
             @Override
