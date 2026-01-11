@@ -8,16 +8,13 @@ import com.matchpointplus.models.Match;
 import com.matchpointplus.models.Message;
 import com.matchpointplus.models.User;
 import okhttp3.*;
+import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Clean Code Refactored SupabaseManager
- * Manages Authentication, Database, and Storage operations for Supabase.
- */
 public class SupabaseManager {
     private static final String TAG = "SupabaseManager";
     private static final String SUPABASE_URL = "https://qpharxkcirttiaowqxaf.supabase.co";
@@ -29,10 +26,66 @@ public class SupabaseManager {
     private static final MediaType JPEG_MEDIA_TYPE = MediaType.parse("image/jpeg");
 
     private static User currentUser;
+    private static WebSocket realtimeSocket;
 
     public interface SupabaseCallback<T> {
         void onSuccess(T result);
         void onError(Exception e);
+    }
+
+    public interface RealtimeCallback {
+        void onNewMessage(Message message);
+    }
+
+    // --- Realtime ---
+
+    public static void subscribeToMessages(String receiverId, RealtimeCallback callback) {
+        String wsUrl = SUPABASE_URL.replace("https://", "wss://") + "/realtime/v1/websocket?apikey=" + SUPABASE_KEY;
+        Request request = new Request.Builder().url(wsUrl).build();
+
+        realtimeSocket = client.newWebSocket(request, new WebSocketListener() {
+            @Override
+            public void onOpen(WebSocket webSocket, Response response) {
+                Log.d(TAG, "Realtime WebSocket Opened");
+                // Join the channel for messages table
+                try {
+                    JSONObject joinMsg = new JSONObject();
+                    joinMsg.put("topic", "realtime:public:messages");
+                    joinMsg.put("event", "phx_join");
+                    joinMsg.put("payload", new JSONObject());
+                    joinMsg.put("ref", "1");
+                    webSocket.send(joinMsg.toString());
+                } catch (Exception e) { e.printStackTrace(); }
+            }
+
+            @Override
+            public void onMessage(WebSocket webSocket, String text) {
+                try {
+                    JSONObject json = new JSONObject(text);
+                    if (json.has("event") && json.getString("event").equals("INSERT")) {
+                        JSONObject record = json.getJSONObject("payload").getJSONObject("record");
+                        Message newMessage = gson.fromJson(record.toString(), Message.class);
+                        
+                        // Check if the message is for the current conversation
+                        if (newMessage.getReceiverId().equals(receiverId)) {
+                            callback.onNewMessage(newMessage);
+                        }
+                    }
+                } catch (Exception e) { Log.e(TAG, "Realtime Parse Error: " + e.getMessage()); }
+            }
+
+            @Override
+            public void onFailure(WebSocket webSocket, Throwable t, Response response) {
+                Log.e(TAG, "Realtime WebSocket Failure: " + t.getMessage());
+            }
+        });
+    }
+
+    public static void unsubscribeRealtime() {
+        if (realtimeSocket != null) {
+            realtimeSocket.close(1000, "User closed chat");
+            realtimeSocket = null;
+        }
     }
 
     // --- Authentication ---
@@ -66,17 +119,15 @@ public class SupabaseManager {
     public static void signUp(String email, String password, SupabaseCallback<Void> callback) {
         User newUser = new User(email, password);
         newUser.setId(UUID.randomUUID().toString());
-        saveUsers(Collections.singletonList(newUser), callback);
-    }
-
-    private static void saveUsers(List<User> users, SupabaseCallback<Void> callback) {
-        sendPostRequest("/rest/v1/users", gson.toJson(users), true, callback);
+        sendPostRequest("/rest/v1/users", gson.toJson(Collections.singletonList(newUser)), true, callback);
     }
 
     // --- Storage ---
 
     public static void uploadImage(Bitmap bitmap, SupabaseCallback<String> callback) {
-        byte[] data = bitmapToByteArray(bitmap);
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, stream);
+        byte[] data = stream.toByteArray();
         String fileName = "profile_" + System.currentTimeMillis() + ".jpg";
         String bucketName = "avatars";
 
@@ -108,7 +159,7 @@ public class SupabaseManager {
         });
     }
 
-    // --- Database: Matches ---
+    // --- Database ---
 
     public static void saveMatches(List<Match> matches, SupabaseCallback<Void> callback) {
         sendPostRequest("/rest/v1/matches", gson.toJson(matches), true, callback);
@@ -145,8 +196,6 @@ public class SupabaseManager {
         executeRequest(request, callback);
     }
 
-    // --- Database: Messages ---
-
     public static void saveMessage(Message message) {
         saveMessages(Collections.singletonList(message), null);
     }
@@ -165,7 +214,7 @@ public class SupabaseManager {
         executeGetRequest(url, new TypeToken<List<Message>>() {}, callback);
     }
 
-    // --- Private Helpers ---
+    // --- Helpers ---
 
     private static Request.Builder buildBaseRequest(HttpUrl url) {
         return new Request.Builder()
@@ -221,11 +270,5 @@ public class SupabaseManager {
                 response.close();
             }
         });
-    }
-
-    private static byte[] bitmapToByteArray(Bitmap bitmap) {
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, stream);
-        return stream.toByteArray();
     }
 }
