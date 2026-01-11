@@ -34,23 +34,31 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="ניהול נתונים"
+                android:text="ניהול מועמדים"
                 android:textStyle="bold"
                 android:textSize="18sp"
                 android:layout_marginBottom="16dp" />
 
             <Button
+                android:id="@+id/addCandidateButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="הוסף מועמד ידנית"
+                android:layout_marginBottom="12dp" />
+
+            <Button
                 android:id="@+id/seedDataButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="טען נתוני Mock לענן (Seed)"
+                android:text="טען נתוני Mock (Seed)"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_marginBottom="12dp" />
 
             <Button
                 android:id="@+id/clearDataButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="נקה את כל המועמדים (Reset)"
+                android:text="נקה מועמדים (Reset)"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:textColor="#F44336"
                 app:strokeColor="#F44336" />

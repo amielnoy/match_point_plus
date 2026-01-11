@@ -1,5 +1,6 @@
 package com.matchpointplus.views;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -23,6 +24,10 @@ public class AdminActivity extends AppCompatActivity {
 
         progressBar = findViewById(R.id.adminProgressBar);
         statusTextView = findViewById(R.id.statusTextView);
+
+        findViewById(R.id.addCandidateButton).setOnClickListener(v -> {
+            startActivity(new Intent(this, AddCandidateActivity.class));
+        });
 
         findViewById(R.id.seedDataButton).setOnClickListener(v -> performSeed());
         findViewById(R.id.clearDataButton).setOnClickListener(v -> performReset());
@@ -48,8 +53,6 @@ public class AdminActivity extends AppCompatActivity {
 
     private void performReset() {
         setLoading(true, "מנקה נתונים מהענן...");
-        // ב-Supabase מחיקה מתבצעת על ידי שליחת רשימה ריקה או קריאת DELETE ייעודית
-        // כרגע נשתמש בעדכון סטטוסים ל-false כאיפוס זמני, או נממש DELETE בעתיד
         Toast.makeText(this, "פונקציית איפוס מלא תמומש בגרסה הבאה", Toast.LENGTH_SHORT).show();
         setLoading(false, "מוכן");
     }
