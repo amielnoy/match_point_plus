@@ -21,9 +21,8 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.slider.RangeSlider;
 import com.matchpointplus.R;
 import com.matchpointplus.adapters.SearchMatchAdapter;
-import com.matchpointplus.data.SupabaseManager;
-import com.matchpointplus.models.Match;
 import com.matchpointplus.viewmodels.SearchViewModel;
+import com.matchpointplus.data.SupabaseManager;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -68,7 +67,7 @@ public class SearchMatchesActivity extends AppCompatActivity {
 
                 @Override
                 public void onError(Exception e) {
-                    runOnUiThread(() -> Toast.makeText(SearchMatchesActivity.this, "הוספה נכשלה: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                    runOnUiThread(() -> Toast.makeText(SearchMatchesActivity.this, "הוספה נכשלה", Toast.LENGTH_SHORT).show());
                 }
             });
         });
@@ -81,19 +80,31 @@ public class SearchMatchesActivity extends AppCompatActivity {
         NavigationView navigationView = findViewById(R.id.searchNavigationView);
 
         if (menuButton != null) {
-            menuButton.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
+            menuButton.setOnClickListener(v -> {
+                if (drawerLayout != null) drawerLayout.openDrawer(GravityCompat.START);
+            });
         }
 
         if (navigationView != null) {
             navigationView.setNavigationItemSelectedListener(item -> {
-                int id = item.getItemId();
-                if (id == R.id.nav_matches) finish();
-                else if (id == R.id.nav_profile) startActivity(new Intent(this, ProfileActivity.class));
-                else if (id == R.id.nav_logout) navigateToLogin();
-                
-                drawerLayout.closeDrawer(GravityCompat.START);
+                handleNavigation(item.getItemId());
+                if (drawerLayout != null) drawerLayout.closeDrawer(GravityCompat.START);
                 return true;
             });
+        }
+    }
+
+    private void handleNavigation(int id) {
+        if (id == R.id.nav_matches) {
+            finish();
+        } else if (id == R.id.nav_profile) {
+            startActivity(new Intent(this, ProfileActivity.class));
+        } else if (id == R.id.nav_signup) {
+            startActivity(new Intent(this, SignUpActivity.class));
+        } else if (id == R.id.nav_admin) {
+            startActivity(new Intent(this, AdminActivity.class));
+        } else if (id == R.id.nav_logout) {
+            navigateToLogin();
         }
     }
 
@@ -106,6 +117,9 @@ public class SearchMatchesActivity extends AppCompatActivity {
             ageSlider.addOnChangeListener((slider, value, fromUser) -> {
                 List<Float> vals = slider.getValues();
                 viewModel.updateAgeRange(Math.round(vals.get(0)), Math.round(vals.get(1)));
+                if (ageRangeDisplayTextView != null) {
+                    ageRangeDisplayTextView.setText(Math.round(vals.get(0)) + " - " + Math.round(vals.get(1)));
+                }
             });
         }
     }
@@ -141,8 +155,6 @@ public class SearchMatchesActivity extends AppCompatActivity {
             if (matches != null) {
                 adapter.setMatches(matches);
                 resultsCountTextView.setText("נמצאו " + matches.size() + " התאמות");
-            } else {
-                Toast.makeText(this, "Error loading data", Toast.LENGTH_SHORT).show();
             }
         });
     }
