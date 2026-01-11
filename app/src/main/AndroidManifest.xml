@@ -27,7 +27,6 @@
         <activity android:name=".views.MatchesActivity" />
         <activity android:name=".views.ChatActivity" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".views.ProfileActivity" />
-        <activity android:name=".views.SettingsActivity" />
         <activity android:name=".views.SignUpActivity" />
         <activity android:name=".views.SearchMatchesActivity" />
         <activity android:name=".views.AdminActivity" />
