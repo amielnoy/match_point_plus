@@ -32,6 +32,7 @@
         <activity android:name=".views.SearchMatchesActivity" />
         <activity android:name=".views.AdminActivity" />
         <activity android:name=".views.AddCandidateActivity" />
+        <activity android:name=".views.MessagesListActivity" />
         
     </application>
 
