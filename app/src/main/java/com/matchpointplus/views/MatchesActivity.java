@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -58,13 +59,15 @@ public class MatchesActivity extends AppCompatActivity {
     }
 
     private void setupNavigation() {
-        findViewById(R.id.menuButton).setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
+        findViewById(R.id.menuButton).setOnClickListener(v -> {
+            if (drawerLayout != null) drawerLayout.openDrawer(GravityCompat.START);
+        });
         
         NavigationView navigationView = findViewById(R.id.navigationView);
         if (navigationView != null) {
             navigationView.setNavigationItemSelectedListener(item -> {
                 handleNavigation(item.getItemId());
-                drawerLayout.closeDrawer(GravityCompat.START);
+                if (drawerLayout != null) drawerLayout.closeDrawer(GravityCompat.START);
                 return true;
             });
         }
@@ -83,8 +86,10 @@ public class MatchesActivity extends AppCompatActivity {
     }
 
     private void setupActionButtons() {
-        findViewById(R.id.passButton).setOnClickListener(v -> handleSwipe());
-        findViewById(R.id.likeButton).setOnClickListener(v -> handleSwipe());
+        View passButton = findViewById(R.id.passButton);
+        if (passButton != null) {
+            passButton.setOnClickListener(v -> handlePass());
+        }
     }
 
     private void setupObservers() {
@@ -92,9 +97,10 @@ public class MatchesActivity extends AppCompatActivity {
             matches.clear();
             if (result != null && !result.isEmpty()) {
                 matches.addAll(result);
-                adapter.notifyDataSetChanged();
+                if (adapter != null) adapter.notifyDataSetChanged();
                 toggleEmptyState(false);
             } else {
+                if (adapter != null) adapter.notifyDataSetChanged();
                 toggleEmptyState(true);
             }
         });
@@ -105,13 +111,21 @@ public class MatchesActivity extends AppCompatActivity {
         if (viewPager != null) viewPager.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
     }
 
-    private void handleSwipe() {
-        if (viewPager == null || matches.isEmpty()) return;
+    private void handlePass() {
+        // בדיקת בטיחות: האם הרשימה קיימת ולא ריקה?
+        if (viewPager == null || matches == null || matches.isEmpty()) {
+            return;
+        }
+        
         int currentItem = viewPager.getCurrentItem();
-        if (currentItem < matches.size() - 1) {
-            viewPager.setCurrentItem(currentItem + 1, true);
-        } else {
-            toggleEmptyState(true);
+        
+        // בדיקה שהאינדקס הנוכחי תקין
+        if (currentItem >= 0 && currentItem < matches.size()) {
+            Match matchToRemove = matches.get(currentItem);
+            
+            // עדכון ה-DB דרך ה-ViewModel
+            viewModel.removeMatch(matchToRemove);
+            Toast.makeText(this, matchToRemove.getName() + " הוסר מהרשימה", Toast.LENGTH_SHORT).show();
         }
     }
 
