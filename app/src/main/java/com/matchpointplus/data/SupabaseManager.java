@@ -114,6 +114,14 @@ public class SupabaseManager {
         });
     }
 
+    public static void signUp(String email, String password, SupabaseCallback<Void> callback) {
+        User newUser = new User(email, password);
+        // יצירת ID ייחודי לכל משתמש חדש
+        newUser.setId(UUID.randomUUID().toString());
+        List<User> list = Collections.singletonList(newUser);
+        sendPostRequest("/rest/v1/users", gson.toJson(list), true, callback);
+    }
+
     public static void updateMatchSelection(String matchId, boolean isSelected, SupabaseCallback<Void> callback) {
         String json = "{\"is_selected\": " + isSelected + "}";
         RequestBody body = RequestBody.create(json, MediaType.parse("application/json; charset=utf-8"));
@@ -138,7 +146,6 @@ public class SupabaseManager {
                     if (callback != null) callback.onSuccess(null);
                 } else {
                     String errorBody = response.body() != null ? response.body().string() : "";
-                    Log.e(TAG, "PATCH ERROR " + response.code() + ": " + errorBody);
                     if (callback != null) callback.onError(new Exception(errorBody));
                 }
                 response.close();
@@ -195,11 +202,10 @@ public class SupabaseManager {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                String body = response.body() != null ? response.body().string() : "";
                 if (response.isSuccessful()) {
                     if (callback != null) callback.onSuccess(null);
                 } else {
-                    Log.e(TAG, "POST ERROR " + response.code() + ": " + body);
+                    String body = response.body() != null ? response.body().string() : "";
                     if (callback != null) callback.onError(new Exception(body));
                 }
                 response.close();
