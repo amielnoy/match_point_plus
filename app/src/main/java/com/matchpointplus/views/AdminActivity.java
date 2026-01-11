@@ -7,13 +7,13 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 import com.matchpointplus.R;
-import com.matchpointplus.data.MockData;
-import com.matchpointplus.data.SupabaseManager;
-import java.util.Collections;
+import com.matchpointplus.viewmodels.AdminViewModel;
 
 public class AdminActivity extends AppCompatActivity {
 
+    private AdminViewModel viewModel;
     private ProgressBar progressBar;
     private TextView statusTextView;
 
@@ -22,43 +22,34 @@ public class AdminActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin);
 
+        viewModel = new ViewModelProvider(this).get(AdminViewModel.class);
+
+        initViews();
+        setupListeners();
+        setupObservers();
+    }
+
+    private void initViews() {
         progressBar = findViewById(R.id.adminProgressBar);
         statusTextView = findViewById(R.id.statusTextView);
+    }
 
-        findViewById(R.id.addCandidateButton).setOnClickListener(v -> {
-            startActivity(new Intent(this, AddCandidateActivity.class));
+    private void setupListeners() {
+        findViewById(R.id.addCandidateButton).setOnClickListener(v -> 
+            startActivity(new Intent(this, AddCandidateActivity.class)));
+
+        findViewById(R.id.seedDataButton).setOnClickListener(v -> viewModel.seedMockData());
+        
+        findViewById(R.id.clearDataButton).setOnClickListener(v -> viewModel.resetData());
+    }
+
+    private void setupObservers() {
+        viewModel.getStatusMessage().observe(this, status -> {
+            if (status != null) statusTextView.setText("סטטוס: " + status);
         });
 
-        findViewById(R.id.seedDataButton).setOnClickListener(v -> performSeed());
-        findViewById(R.id.clearDataButton).setOnClickListener(v -> performReset());
-    }
-
-    private void performSeed() {
-        setLoading(true, "מעלה נתוני Mock לענן...");
-        SupabaseManager.saveMatches(MockData.getUsers(), new SupabaseManager.SupabaseCallback<Void>() {
-            @Override
-            public void onSuccess(Void result) {
-                runOnUiThread(() -> {
-                    setLoading(false, "הנתונים נטענו בהצלחה!");
-                    Toast.makeText(AdminActivity.this, "סינכרון הושלם", Toast.LENGTH_SHORT).show();
-                });
-            }
-
-            @Override
-            public void onError(Exception e) {
-                runOnUiThread(() -> setLoading(false, "שגיאה בטעינה: " + e.getMessage()));
-            }
+        viewModel.getIsLoading().observe(this, isLoading -> {
+            progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
         });
-    }
-
-    private void performReset() {
-        setLoading(true, "מנקה נתונים מהענן...");
-        Toast.makeText(this, "פונקציית איפוס מלא תמומש בגרסה הבאה", Toast.LENGTH_SHORT).show();
-        setLoading(false, "מוכן");
-    }
-
-    private void setLoading(boolean isLoading, String status) {
-        progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
-        statusTextView.setText("סטטוס: " + status);
     }
 }

@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -78,6 +77,8 @@ public class MatchesActivity extends AppCompatActivity {
             startActivity(new Intent(this, ProfileActivity.class));
         } else if (itemId == R.id.nav_search) {
             startActivity(new Intent(this, SearchMatchesActivity.class));
+        } else if (itemId == R.id.nav_messages) {
+            startActivity(new Intent(this, MessagesListActivity.class));
         } else if (itemId == R.id.nav_signup) {
             startActivity(new Intent(this, SignUpActivity.class));
         } else if (itemId == R.id.nav_admin) {
@@ -117,13 +118,10 @@ public class MatchesActivity extends AppCompatActivity {
         if (viewPager == null || matches == null || matches.isEmpty()) {
             return;
         }
-        
         int currentItem = viewPager.getCurrentItem();
-        
         if (currentItem >= 0 && currentItem < matches.size()) {
             Match matchToRemove = matches.get(currentItem);
             viewModel.removeMatch(matchToRemove);
-            Toast.makeText(this, matchToRemove.getName() + " הוסר מהרשימה", Toast.LENGTH_SHORT).show();
         }
     }
 
