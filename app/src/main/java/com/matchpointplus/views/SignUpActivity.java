@@ -1,6 +1,8 @@
 package com.matchpointplus.views;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -12,9 +14,11 @@ import com.matchpointplus.viewmodels.SignUpViewModel;
 
 public class SignUpActivity extends AppCompatActivity {
 
+    private static final String TAG = "SignUpActivity";
     private EditText emailEditText;
     private EditText passwordEditText;
     private SignUpViewModel viewModel;
+    private Button signupButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,7 +29,7 @@ public class SignUpActivity extends AppCompatActivity {
 
         emailEditText = findViewById(R.id.signupEmailEditText);
         passwordEditText = findViewById(R.id.signupPasswordEditText);
-        Button signupButton = findViewById(R.id.signupButton);
+        signupButton = findViewById(R.id.signupButton);
         TextView loginLink = findViewById(R.id.loginLink);
 
         signupButton.setOnClickListener(v -> performSignUp());
@@ -41,12 +45,26 @@ public class SignUpActivity extends AppCompatActivity {
             return;
         }
 
+        signupButton.setEnabled(false);
+        signupButton.setText("רושם אותך...");
+
+        Log.d(TAG, "מתחיל תהליך הרשמה עבור: " + email);
+
         viewModel.signUp(email, password).observe(this, success -> {
+            signupButton.setEnabled(true);
+            signupButton.setText("הירשם עכשיו");
+
             if (Boolean.TRUE.equals(success)) {
-                Toast.makeText(SignUpActivity.this, "החשבון נוצר בהצלחה! ניתן להתחבר.", Toast.LENGTH_LONG).show();
+                Log.d(TAG, "הרשמה הצליחה!");
+                Toast.makeText(SignUpActivity.this, "החשבון נוצר! בוא נשלים את הפרופיל שלך", Toast.LENGTH_LONG).show();
+                
+                // מעבר למסך הוספת פרטים נוספים
+                Intent intent = new Intent(SignUpActivity.this, AddCandidateActivity.class);
+                startActivity(intent);
                 finish();
             } else {
-                Toast.makeText(SignUpActivity.this, "ההרשמה נכשלה. ייתכן והאימייל כבר קיים.", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "הרשמה נכשלה בשרת");
+                Toast.makeText(SignUpActivity.this, "ההרשמה נכשלה. בדוק את החיבור או נסה אימייל אחר.", Toast.LENGTH_SHORT).show();
             }
         });
     }
