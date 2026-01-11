@@ -43,6 +43,55 @@
             app:layout_constraintBottom_toTopOf="@+id/controlsLayout"
             app:layout_constraintTop_toBottomOf="@id/menuButton" />
 
+        <!-- Discovery / Empty State Container -->
+        <LinearLayout
+            android:id="@+id/discoveryContainer"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="32dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:layout_width="140dp"
+                android:layout_height="140dp"
+                android:src="@drawable/ic_sparkle"
+                app:tint="#FFE1E1"
+                android:layout_marginBottom="24dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="זה הכל לעכשיו!"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="@color/on_surface"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="רוצים להכיר עוד אנשים חדשים?"
+                android:textSize="16sp"
+                android:textColor="@color/gray_text"
+                android:textAlignment="center"
+                android:layout_marginBottom="32dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/discoverMoreButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="מצאו עוד שידוכים"
+                android:paddingStart="32dp"
+                android:paddingEnd="32dp"
+                app:cornerRadius="24dp" />
+        </LinearLayout>
+
         <!-- Controls -->
         <LinearLayout
             android:id="@+id/controlsLayout"
@@ -73,21 +122,6 @@
                 app:strokeWidth="1dp" />
 
         </LinearLayout>
-
-        <TextView
-            android:id="@+id/emptyStateTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="@string/no_matches"
-            android:textSize="24sp"
-            android:fontFamily="sans-serif-medium"
-            android:textColor="@color/gray_text"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -46,6 +46,10 @@ public class MatchesActivity extends AppCompatActivity {
     private void initViews() {
         adapter = new MatchAdapter(matches, this::showAiSummaryBottomSheet);
         binding.viewPager.setAdapter(adapter);
+        
+        // Link the discovery button to search screen
+        binding.discoverMoreButton.setOnClickListener(v -> 
+            startActivity(new Intent(this, SearchMatchesActivity.class)));
     }
 
     private void setupNavigation() {
@@ -93,8 +97,9 @@ public class MatchesActivity extends AppCompatActivity {
     }
 
     private void toggleEmptyState(boolean isEmpty) {
-        binding.emptyStateTextView.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
+        binding.discoveryContainer.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
         binding.viewPager.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
+        binding.controlsLayout.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
     }
 
     private void handlePass() {
