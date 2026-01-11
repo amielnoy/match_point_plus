@@ -3,13 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/drawerLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/background_light">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="?attr/colorSurface">
+        android:layout_height="match_parent">
 
+        <!-- Top Bar -->
         <ImageButton
             android:id="@+id/menuButton"
             android:layout_width="48dp"
@@ -26,13 +27,14 @@
             android:layout_height="wrap_content"
             android:text="@string/app_name"
             android:textColor="@color/primary"
-            android:textSize="20sp"
-            android:textStyle="bold"
+            android:textSize="22sp"
+            android:fontFamily="sans-serif-black"
             app:layout_constraintBottom_toBottomOf="@id/menuButton"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@id/menuButton" />
 
+        <!-- Main Feed -->
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/viewPager"
             android:layout_width="match_parent"
@@ -41,24 +43,34 @@
             app:layout_constraintBottom_toTopOf="@+id/controlsLayout"
             app:layout_constraintTop_toBottomOf="@id/menuButton" />
 
+        <!-- Controls -->
         <LinearLayout
             android:id="@+id/controlsLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:orientation="horizontal"
-            android:padding="24dp"
+            android:padding="32dp"
             app:layout_constraintBottom_toBottomOf="parent">
 
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/passButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_x"
-                app:backgroundTint="@android:color/white"
-                app:fabCustomSize="72dp"
-                app:maxImageSize="36dp"
-                app:tint="@android:color/darker_gray" />
+                style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                android:layout_width="84dp"
+                android:layout_height="84dp"
+                android:insetLeft="0dp"
+                android:insetTop="0dp"
+                android:insetRight="0dp"
+                android:insetBottom="0dp"
+                app:icon="@drawable/ic_x"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                app:iconSize="32dp"
+                app:iconTint="@color/gray_text"
+                app:backgroundTint="@color/white"
+                app:cornerRadius="42dp"
+                app:strokeColor="#1A000000"
+                app:strokeWidth="1dp" />
 
         </LinearLayout>
 
@@ -69,7 +81,8 @@
             android:gravity="center"
             android:text="@string/no_matches"
             android:textSize="24sp"
-            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium"
+            android:textColor="@color/gray_text"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
