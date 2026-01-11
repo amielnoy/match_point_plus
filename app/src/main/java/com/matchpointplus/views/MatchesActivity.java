@@ -78,6 +78,8 @@ public class MatchesActivity extends AppCompatActivity {
             startActivity(new Intent(this, ProfileActivity.class));
         } else if (itemId == R.id.nav_search) {
             startActivity(new Intent(this, SearchMatchesActivity.class));
+        } else if (itemId == R.id.nav_signup) {
+            startActivity(new Intent(this, SignUpActivity.class));
         } else if (itemId == R.id.nav_admin) {
             startActivity(new Intent(this, AdminActivity.class));
         } else if (itemId == R.id.nav_logout) {
@@ -112,18 +114,14 @@ public class MatchesActivity extends AppCompatActivity {
     }
 
     private void handlePass() {
-        // בדיקת בטיחות: האם הרשימה קיימת ולא ריקה?
         if (viewPager == null || matches == null || matches.isEmpty()) {
             return;
         }
         
         int currentItem = viewPager.getCurrentItem();
         
-        // בדיקה שהאינדקס הנוכחי תקין
         if (currentItem >= 0 && currentItem < matches.size()) {
             Match matchToRemove = matches.get(currentItem);
-            
-            // עדכון ה-DB דרך ה-ViewModel
             viewModel.removeMatch(matchToRemove);
             Toast.makeText(this, matchToRemove.getName() + " הוסר מהרשימה", Toast.LENGTH_SHORT).show();
         }
