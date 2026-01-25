@@ -8,6 +8,8 @@ import java.util.List;
 public class MatchRepository {
     private static MatchRepository instance;
 
+    private MatchRepository() {}
+
     public static MatchRepository getInstance() {
         if (instance == null) {
             instance = new MatchRepository();
@@ -31,7 +33,13 @@ public class MatchRepository {
         return data;
     }
 
+    public void updateMatchSelection(String matchId, boolean isSelected, SupabaseManager.SupabaseCallback<Void> callback) {
+        // Corrected: Uses the generic updateMatchField method now in SupabaseManager
+        SupabaseManager.updateMatchField(matchId, "is_selected", isSelected, callback);
+    }
+
     public void saveMatches(List<Match> matches) {
+        // Corrected: signature now requires a callback
         SupabaseManager.saveMatches(matches, null);
     }
 }

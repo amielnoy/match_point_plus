@@ -37,115 +37,39 @@ public class SupabaseManager {
         void onNewMessage(Message message);
     }
 
-    // --- Messages ---
-
-    public static void saveMessage(Message message) {
-        saveMessages(Collections.singletonList(message), null);
-    }
-
-    public static void saveMessages(List<Message> messages, SupabaseCallback<Void> callback) {
-        try {
-            String bodyString = gson.toJson(messages);
-            Log.d(TAG, "Outgoing messages JSON: " + bodyString);
-
-            HttpUrl url = HttpUrl.parse(SUPABASE_URL).newBuilder()
-                    .addPathSegments("rest/v1/messages")
-                    .build();
-
-            Request.Builder builder = new Request.Builder()
-                    .url(url)
-                    .addHeader("apikey", SUPABASE_KEY)
-                    .addHeader("Authorization", "Bearer " + SUPABASE_KEY)
-                    .addHeader("Content-Type", "application/json")
-                    .addHeader("Prefer", "resolution=merge-duplicates")
-                    .post(RequestBody.create(bodyString, JSON_MEDIA_TYPE));
-
-            executeRequest(builder.build(), callback);
-        } catch (Exception e) {
-            if (callback != null) callback.onError(e);
-        }
-    }
-
-    public static void fetchMessages(String receiverId, SupabaseCallback<List<Message>> callback) {
-        HttpUrl url = HttpUrl.parse(SUPABASE_URL).newBuilder()
-                .addPathSegments("rest/v1/messages")
-                .addQueryParameter("receiver_id", "eq." + receiverId)
-                .addQueryParameter("select", "*")
-                .addQueryParameter("order", "created_at.asc")
-                .build();
-        executeGetRequest(url, new TypeToken<List<Message>>() {}, callback);
-    }
-
-    public static void subscribeToMessages(String receiverId, RealtimeCallback callback) {
-        String wsUrl = SUPABASE_URL.replace("https://", "wss://") + "/realtime/v1/websocket?apikey=" + SUPABASE_KEY;
-        Request request = new Request.Builder().url(wsUrl).build();
-        realtimeSocket = client.newWebSocket(request, new WebSocketListener() {
-            @Override
-            public void onOpen(WebSocket webSocket, Response response) {
-                try {
-                    JSONObject joinMsg = new JSONObject();
-                    joinMsg.put("topic", "realtime:public:messages");
-                    joinMsg.put("event", "phx_join");
-                    joinMsg.put("payload", new JSONObject());
-                    joinMsg.put("ref", "1");
-                    webSocket.send(joinMsg.toString());
-                } catch (Exception e) { e.printStackTrace(); }
-            }
-            @Override
-            public void onMessage(WebSocket webSocket, String text) {
-                try {
-                    JSONObject json = new JSONObject(text);
-                    if (json.has("event") && json.getString("event").equals("INSERT")) {
-                        JSONObject record = json.getJSONObject("payload").getJSONObject("record");
-                        Message newMessage = gson.fromJson(record.toString(), Message.class);
-                        if (newMessage.getReceiverId().equals(receiverId)) {
-                            callback.onNewMessage(newMessage);
-                        }
-                    }
-                } catch (Exception e) { Log.e(TAG, "Realtime Parse Error: " + e.getMessage()); }
-            }
-        });
-    }
-
-    public static void unsubscribeRealtime() {
-        if (realtimeSocket != null) {
-            realtimeSocket.close(1000, "User closed chat");
-            realtimeSocket = null;
-        }
-    }
-
     // --- Authentication ---
 
     public static User getCurrentUser() { return currentUser; }
     public static void setCurrentUser(User user) { currentUser = user; }
 
     public static void login(String email, String password, SupabaseCallback<User> callback) {
-        HttpUrl url = HttpUrl.parse(SUPABASE_URL).newBuilder()
-                .addPathSegments("rest/v1/users")
-                .addQueryParameter("email", "eq." + email)
-                .addQueryParameter("password", "eq." + password)
-                .addQueryParameter("select", "*")
-                .build();
-
-        executeGetRequest(url, new TypeToken<List<User>>(){}, new SupabaseCallback<List<User>>() {
-            @Override
-            public void onSuccess(List<User> users) {
+        String url = SUPABASE_URL + "/rest/v1/users?email=eq." + email + "&password=eq." + password + "&select=*";
+        executeSimpleGetRequest(url, new TypeToken<List<User>>() {}, new SupabaseCallback<List<User>>() {
+            @Override public void onSuccess(List<User> users) {
                 if (users != null && !users.isEmpty()) {
                     currentUser = users.get(0);
                     callback.onSuccess(currentUser);
-                } else {
-                    callback.onError(new Exception("Invalid email or password"));
-                }
+                } else { callback.onError(new Exception("Invalid credentials")); }
             }
-            @Override
-            public void onError(Exception e) { callback.onError(e); }
+            @Override public void onError(Exception e) { callback.onError(e); }
         });
     }
 
     public static void signUp(String email, String password, SupabaseCallback<Void> callback) {
         User newUser = new User(email, password);
         newUser.setId(UUID.randomUUID().toString());
-        sendPostRequest("/rest/v1/users", gson.toJson(Collections.singletonList(newUser)), true, callback);
+        sendPostRequest("rest/v1/users", gson.toJson(Collections.singletonList(newUser)), true, "id", callback);
+    }
+
+    // --- User Management ---
+
+    public static void updateUserField(String id, String field, Object val, SupabaseCallback<Void> callback) {
+        try {
+            JSONObject json = new JSONObject(); json.put(field, val);
+            String url = SUPABASE_URL + "/rest/v1/users?id=eq." + id;
+            Request request = buildBaseRequest(HttpUrl.parse(url)).patch(RequestBody.create(json.toString(), JSON_MEDIA_TYPE)).build();
+            executeRequest(request, callback);
+        } catch (Exception e) { if (callback != null) callback.onError(e); }
     }
 
     // --- Storage ---
@@ -155,26 +79,36 @@ public class SupabaseManager {
         bitmap.compress(Bitmap.CompressFormat.JPEG, 80, stream);
         byte[] data = stream.toByteArray();
         String fileName = "profile_" + System.currentTimeMillis() + ".jpg";
-        String bucketName = "avatars";
-        HttpUrl url = HttpUrl.parse(SUPABASE_URL).newBuilder()
-                .addPathSegments("storage/v1/object")
-                .addPathSegment(bucketName)
-                .addPathSegment(fileName)
-                .build();
-        Request request = new Request.Builder().url(url)
-                .addHeader("apikey", SUPABASE_KEY)
-                .addHeader("Authorization", "Bearer " + SUPABASE_KEY)
+        
+        // בניית URL מפורשת עבור ה-Storage
+        String url = SUPABASE_URL + "/storage/v1/object/avatars/" + fileName;
+        
+        Log.d(TAG, "Uploading image to: " + url);
+
+        Request request = buildBaseRequest(HttpUrl.parse(url))
                 .header("Content-Type", "image/jpeg")
-                .post(RequestBody.create(data, JPEG_MEDIA_TYPE)).build();
+                .addHeader("x-upsert", "true") // מאפשר החלפת תמונה קיימת
+                .post(RequestBody.create(data, JPEG_MEDIA_TYPE))
+                .build();
+
         client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) { callback.onError(e); }
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    callback.onSuccess(SUPABASE_URL + "/storage/v1/object/public/" + bucketName + "/" + fileName);
-                } else { callback.onError(new Exception("Upload failed: " + response.code())); }
-                response.close();
+            @Override public void onFailure(Call call, IOException e) {
+                Log.e(TAG, "Upload failed: " + e.getMessage());
+                if (callback != null) callback.onError(e);
+            }
+
+            @Override public void onResponse(Call call, Response response) throws IOException {
+                try (ResponseBody body = response.body()) {
+                    String responseString = body != null ? body.string() : "";
+                    if (response.isSuccessful()) {
+                        String publicUrl = SUPABASE_URL + "/storage/v1/object/public/avatars/" + fileName;
+                        Log.d(TAG, "Upload success: " + publicUrl);
+                        if (callback != null) callback.onSuccess(publicUrl);
+                    } else {
+                        Log.e(TAG, "Server rejected upload (" + response.code() + "): " + responseString);
+                        if (callback != null) callback.onError(new Exception(responseString));
+                    }
+                }
             }
         });
     }
@@ -183,50 +117,90 @@ public class SupabaseManager {
 
     public static void fetchMatches(SupabaseCallback<List<Match>> callback) {
         String url = SUPABASE_URL + "/rest/v1/matches?is_selected=eq.true&select=*";
-        executeGetRequest(HttpUrl.parse(url), new TypeToken<List<Match>>() {}, callback);
+        executeSimpleGetRequest(url, new TypeToken<List<Match>>() {}, callback);
     }
 
     public static void fetchAllMatches(SupabaseCallback<List<Match>> callback) {
         String url = SUPABASE_URL + "/rest/v1/matches?select=*";
-        executeGetRequest(HttpUrl.parse(url), new TypeToken<List<Match>>() {}, callback);
+        executeSimpleGetRequest(url, new TypeToken<List<Match>>() {}, callback);
     }
 
     public static void saveMatches(List<Match> matches, SupabaseCallback<Void> callback) {
-        sendPostRequest("/rest/v1/matches?on_conflict=id", gson.toJson(matches), true, callback);
+        sendPostRequest("rest/v1/matches", gson.toJson(matches), true, "id", callback);
     }
 
-    public static void updateMatchField(String matchId, String fieldName, Object value, SupabaseCallback<Void> callback) {
+    public static void updateMatchField(String id, String field, Object val, SupabaseCallback<Void> callback) {
         try {
-            JSONObject json = new JSONObject();
-            json.put(fieldName, value);
-            HttpUrl url = HttpUrl.parse(SUPABASE_URL).newBuilder().addPathSegments("rest/v1/matches")
-                    .addQueryParameter("id", "eq." + matchId).build();
-            Request request = new Request.Builder().url(url).addHeader("apikey", SUPABASE_KEY)
-                    .addHeader("Authorization", "Bearer " + SUPABASE_KEY)
-                    .patch(RequestBody.create(json.toString(), JSON_MEDIA_TYPE)).build();
+            JSONObject json = new JSONObject(); json.put(field, val);
+            String url = SUPABASE_URL + "/rest/v1/matches?id=eq." + id;
+            Request request = buildBaseRequest(HttpUrl.parse(url)).patch(RequestBody.create(json.toString(), JSON_MEDIA_TYPE)).build();
             executeRequest(request, callback);
         } catch (Exception e) { if (callback != null) callback.onError(e); }
     }
 
-    public static void updateMatchSelection(String matchId, boolean isSelected, SupabaseCallback<Void> callback) {
-        updateMatchField(matchId, "is_selected", isSelected, callback);
+    // --- Messages & Realtime ---
+
+    public static void saveMessages(List<Message> messages, SupabaseCallback<Void> callback) {
+        sendPostRequest("rest/v1/messages", gson.toJson(messages), true, "id", callback);
+    }
+
+    public static void saveMessage(Message message) {
+        saveMessages(Collections.singletonList(message), null);
+    }
+
+    public static void fetchMessages(String receiverId, SupabaseCallback<List<Message>> callback) {
+        String url = SUPABASE_URL + "/rest/v1/messages?receiver_id=eq." + receiverId + "&select=*&order=created_at.asc";
+        executeSimpleGetRequest(url, new TypeToken<List<Message>>() {}, callback);
+    }
+
+    public static void subscribeToMessages(String receiverId, RealtimeCallback callback) {
+        String wsUrl = SUPABASE_URL.replace("https://", "wss://") + "/realtime/v1/websocket?apikey=" + SUPABASE_KEY;
+        Request request = new Request.Builder().url(wsUrl).build();
+        realtimeSocket = client.newWebSocket(request, new WebSocketListener() {
+            @Override public void onOpen(WebSocket webSocket, Response response) {
+                try {
+                    JSONObject joinMsg = new JSONObject();
+                    joinMsg.put("topic", "realtime:public:messages");
+                    joinMsg.put("event", "phx_join");
+                    joinMsg.put("payload", new JSONObject());
+                    joinMsg.put("ref", "1");
+                    webSocket.send(joinMsg.toString());
+                } catch (Exception e) { e.printStackTrace(); }
+            }
+            @Override public void onMessage(WebSocket webSocket, String text) {
+                try {
+                    JSONObject json = new JSONObject(text);
+                    if (json.has("event") && json.getString("event").equals("INSERT")) {
+                        JSONObject record = json.getJSONObject("payload").getJSONObject("record");
+                        Message newMessage = gson.fromJson(record.toString(), Message.class);
+                        if (newMessage.getReceiverId().equals(receiverId)) { callback.onNewMessage(newMessage); }
+                    }
+                } catch (Exception e) { Log.e(TAG, "Realtime Error: " + e.getMessage()); }
+            }
+        });
+    }
+
+    public static void unsubscribeRealtime() {
+        if (realtimeSocket != null) { realtimeSocket.close(1000, "Closed"); realtimeSocket = null; }
     }
 
     // --- Helpers ---
 
-    private static void executeGetRequest(HttpUrl url, TypeToken<?> typeToken, SupabaseCallback callback) {
-        Request request = new Request.Builder().url(url).addHeader("apikey", SUPABASE_KEY)
-                .addHeader("Authorization", "Bearer " + SUPABASE_KEY).get().build();
+    private static Request.Builder buildBaseRequest(HttpUrl url) {
+        return new Request.Builder().url(url).addHeader("apikey", SUPABASE_KEY).addHeader("Authorization", "Bearer " + SUPABASE_KEY);
+    }
+
+    private static <T> void executeSimpleGetRequest(String url, TypeToken<T> typeToken, SupabaseCallback<T> callback) {
+        Request request = buildBaseRequest(HttpUrl.parse(url)).get().build();
         client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) { callback.onError(e); }
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
+            @Override public void onFailure(Call call, IOException e) { if (callback != null) callback.onError(e); }
+            @Override public void onResponse(Call call, Response response) throws IOException {
                 try (ResponseBody responseBody = response.body()) {
-                    if (response.isSuccessful() && responseBody != null) {
-                        Object result = gson.fromJson(responseBody.string(), typeToken.getType());
-                        callback.onSuccess(result);
-                    } else { callback.onError(new Exception("Error")); }
+                    String bodyString = responseBody != null ? responseBody.string() : "";
+                    if (response.isSuccessful()) {
+                        T result = gson.fromJson(bodyString, typeToken.getType());
+                        if (callback != null) callback.onSuccess(result);
+                    } else { if (callback != null) callback.onError(new Exception(bodyString)); }
                 }
             }
         });
@@ -234,23 +208,20 @@ public class SupabaseManager {
 
     private static void executeRequest(Request request, SupabaseCallback<Void> callback) {
         client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) { if (callback != null) callback.onError(e); }
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                if (response.isSuccessful()) { if (callback != null) callback.onSuccess(null); }
-                else { if (callback != null) callback.onError(new Exception("Error")); }
-                response.close();
+            @Override public void onFailure(Call call, IOException e) { if (callback != null) callback.onError(e); }
+            @Override public void onResponse(Call call, Response response) throws IOException {
+                try (ResponseBody body = response.body()) {
+                    if (response.isSuccessful()) { if (callback != null) callback.onSuccess(null); }
+                    else { if (callback != null) callback.onError(new Exception("Error " + response.code())); }
+                }
             }
         });
     }
 
-    private static void sendPostRequest(String path, String json, boolean isUpsert, SupabaseCallback<Void> callback) {
-        HttpUrl url = HttpUrl.parse(SUPABASE_URL + path);
-        Request.Builder builder = new Request.Builder().url(url)
-                .addHeader("apikey", SUPABASE_KEY)
-                .addHeader("Authorization", "Bearer " + SUPABASE_KEY)
-                .post(RequestBody.create(json, JSON_MEDIA_TYPE));
+    private static void sendPostRequest(String path, String json, boolean isUpsert, String conflict, SupabaseCallback<Void> callback) {
+        String url = SUPABASE_URL + (path.startsWith("/") ? "" : "/") + path;
+        if (isUpsert && conflict != null) url += "?on_conflict=" + conflict;
+        Request.Builder builder = new Request.Builder().url(url).addHeader("apikey", SUPABASE_KEY).addHeader("Authorization", "Bearer " + SUPABASE_KEY).post(RequestBody.create(json, JSON_MEDIA_TYPE));
         if (isUpsert) builder.addHeader("Prefer", "resolution=merge-duplicates");
         executeRequest(builder.build(), callback);
     }

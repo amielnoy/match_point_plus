@@ -3,19 +3,14 @@ package com.matchpointplus.data;
 import android.graphics.Bitmap;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import com.matchpointplus.data.network.SupabaseClient;
 import com.matchpointplus.models.User;
 
 public class UserRepository {
     private static UserRepository instance;
-    private final SupabaseClient supabase;
-    private User currentUser;
 
-    private UserRepository() {
-        this.supabase = SupabaseClient.getInstance();
-    }
+    private UserRepository() {}
 
-    public static synchronized UserRepository getInstance() {
+    public static UserRepository getInstance() {
         if (instance == null) {
             instance = new UserRepository();
         }
@@ -23,76 +18,73 @@ public class UserRepository {
     }
 
     public LiveData<User> login(String email, String password) {
-        MutableLiveData<User> data = new MutableLiveData<>();
-        supabase.getAuthService().login(email, password, new SupabaseManager.SupabaseCallback<User>() {
+        MutableLiveData<User> result = new MutableLiveData<>();
+        SupabaseManager.login(email, password, new SupabaseManager.SupabaseCallback<User>() {
             @Override
-            public void onSuccess(User result) {
-                currentUser = result;
-                data.postValue(result);
+            public void onSuccess(User user) {
+                result.postValue(user);
             }
 
             @Override
             public void onError(Exception e) {
-                data.postValue(null);
+                result.postValue(null);
             }
         });
-        return data;
+        return result;
     }
 
     public LiveData<Boolean> signUp(String email, String password) {
-        MutableLiveData<Boolean> success = new MutableLiveData<>();
-        supabase.getAuthService().signUp(email, password, new SupabaseManager.SupabaseCallback<Void>() {
+        MutableLiveData<Boolean> result = new MutableLiveData<>();
+        SupabaseManager.signUp(email, password, new SupabaseManager.SupabaseCallback<Void>() {
             @Override
-            public void onSuccess(Void result) {
-                success.postValue(true);
+            public void onSuccess(Void v) {
+                result.postValue(true);
             }
 
             @Override
             public void onError(Exception e) {
-                success.postValue(false);
+                result.postValue(false);
             }
         });
-        return success;
-    }
-
-    public LiveData<String> uploadProfileImage(Bitmap bitmap) {
-        MutableLiveData<String> data = new MutableLiveData<>();
-        supabase.getStorageService().uploadImage(bitmap, "avatars", new SupabaseManager.SupabaseCallback<String>() {
-            @Override
-            public void onSuccess(String result) {
-                data.postValue(result);
-            }
-
-            @Override
-            public void onError(Exception e) {
-                data.postValue(null);
-            }
-        });
-        return data;
-    }
-
-    public LiveData<Boolean> updateProfilePicture(String userId, String imageUrl) {
-        MutableLiveData<Boolean> status = new MutableLiveData<>();
-        String json = "{\"profile_picture\": \"" + imageUrl + "\"}";
-        
-        supabase.getDatabaseService().patchData("/rest/v1/users?id=eq." + userId, json, new SupabaseManager.SupabaseCallback<Void>() {
-            @Override
-            public void onSuccess(Void result) {
-                if (currentUser != null) {
-                    currentUser.setProfilePicture(imageUrl);
-                }
-                status.postValue(true);
-            }
-
-            @Override
-            public void onError(Exception e) {
-                status.postValue(false);
-            }
-        });
-        return status;
+        return result;
     }
 
     public User getCurrentUser() {
-        return currentUser;
+        return SupabaseManager.getCurrentUser();
+    }
+
+    public LiveData<String> uploadProfileImage(Bitmap bitmap) {
+        MutableLiveData<String> result = new MutableLiveData<>();
+        SupabaseManager.uploadImage(bitmap, new SupabaseManager.SupabaseCallback<String>() {
+            @Override
+            public void onSuccess(String imageUrl) {
+                result.postValue(imageUrl);
+            }
+
+            @Override
+            public void onError(Exception e) {
+                result.postValue(null);
+            }
+        });
+        return result;
+    }
+
+    public LiveData<Boolean> updateProfilePicture(String userId, String imageUrl) {
+        MutableLiveData<Boolean> result = new MutableLiveData<>();
+        // Corrected: use updateUserField instead of updateMatchField
+        SupabaseManager.updateUserField(userId, "profile_picture", imageUrl, new SupabaseManager.SupabaseCallback<Void>() {
+            @Override
+            public void onSuccess(Void v) {
+                User user = SupabaseManager.getCurrentUser();
+                if (user != null) user.setProfilePicture(imageUrl);
+                result.postValue(true);
+            }
+
+            @Override
+            public void onError(Exception e) {
+                result.postValue(false);
+            }
+        });
+        return result;
     }
 }

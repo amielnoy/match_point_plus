@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModel;
 import com.matchpointplus.data.SupabaseManager;
 import com.matchpointplus.models.Match;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -66,7 +65,6 @@ public class SearchViewModel extends ViewModel {
         SupabaseManager.uploadImage(bitmap, new SupabaseManager.SupabaseCallback<String>() {
             @Override
             public void onSuccess(String imageUrl) {
-                // לאחר העלאת התמונה ל-Storage, נעדכן את שדה ה-profile_picture בטבלת ה-matches
                 updateMatchProfilePicture(match.getId(), imageUrl, callback);
             }
 
@@ -78,12 +76,11 @@ public class SearchViewModel extends ViewModel {
     }
 
     private void updateMatchProfilePicture(String matchId, String imageUrl, SupabaseManager.SupabaseCallback<String> callback) {
-        // שימוש במתודה הגנרית החדשה לעדכון שדה ספציפי (profile_picture)
         SupabaseManager.updateMatchField(matchId, "profile_picture", imageUrl, new SupabaseManager.SupabaseCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
                 callback.onSuccess(imageUrl);
-                fetchAllCandidates(); // רענון הרשימה כדי להציג את התמונה החדשה
+                fetchAllCandidates();
             }
 
             @Override
@@ -123,6 +120,7 @@ public class SearchViewModel extends ViewModel {
     }
 
     public void addMatch(Match match, SupabaseManager.SupabaseCallback<Void> callback) {
-        SupabaseManager.updateMatchSelection(match.getId(), true, callback);
+        // Corrected: Uses the full inner class type SupabaseManager.SupabaseCallback
+        SupabaseManager.updateMatchField(match.getId(), "is_selected", true, callback);
     }
 }

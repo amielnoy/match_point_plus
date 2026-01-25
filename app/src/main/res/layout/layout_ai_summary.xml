@@ -28,33 +28,45 @@
             app:tint="@color/primary" />
 
         <TextView
-            android:id="@+id/aiTitleTextView"
+            android:id="@+id/aiTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
-            android:text="תובנות AI על יעל"
+            android:text="תובנות AI"
             android:textColor="@color/on_surface"
             android:textSize="22sp"
             android:textStyle="bold" />
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/aiDescriptionTextView"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:lineSpacingExtra="4dp"
-        android:text="יעל היא אדם שאוהב הרפתקאות. על פי תחומי העניין שלה, היא עשויה להתאים לך במיוחד אם אתה אוהב לטייל בטבע ולבשל אוכל איטלקי."
-        android:textColor="#666666"
-        android:textSize="16sp" />
+        android:layout_marginTop="16dp">
+
+        <TextView
+            android:id="@+id/aiContentText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:lineSpacingExtra="4dp"
+            android:textColor="#666666"
+            android:textSize="16sp"
+            android:visibility="visible" />
+
+        <ProgressBar
+            android:id="@+id/aiProgressBar"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:visibility="gone" />
+    </FrameLayout>
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/actionButton"
+        android:id="@+id/startChatButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:padding="12dp"
-        android:text="התחל שיחה על סמך התובנות"
+        android:text="@string/start_chat_ai"
         app:cornerRadius="12dp" />
 
 </LinearLayout>

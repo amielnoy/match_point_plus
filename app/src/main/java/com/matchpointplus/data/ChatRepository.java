@@ -32,10 +32,12 @@ public class ChatRepository {
     }
 
     public void saveMessage(Message message) {
+        // Correct call to SupabaseManager
         SupabaseManager.saveMessage(message);
     }
 
     public void syncMessages(List<Message> messages) {
+        // Correct call to SupabaseManager with callback
         SupabaseManager.saveMessages(messages, null);
     }
 }

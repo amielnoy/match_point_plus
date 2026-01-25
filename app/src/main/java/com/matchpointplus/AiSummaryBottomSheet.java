@@ -5,52 +5,88 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+import com.matchpointplus.data.GeminiManager;
+import com.matchpointplus.databinding.LayoutAiSummaryBinding;
 import com.matchpointplus.models.Match;
 import com.matchpointplus.views.ChatActivity;
 
 public class AiSummaryBottomSheet extends BottomSheetDialogFragment {
 
-    private static final String ARG_USER_NAME = "user_name";
-    private static final String ARG_USER_ID = "user_id";
+    private LayoutAiSummaryBinding binding;
+    private Match match;
+    private GeminiManager geminiManager;
 
     public static AiSummaryBottomSheet newInstance(Match match) {
         AiSummaryBottomSheet fragment = new AiSummaryBottomSheet();
-        Bundle args = new Bundle();
-        args.putString(ARG_USER_NAME, match.getName());
-        args.putString(ARG_USER_ID, match.getId());
-        fragment.setArguments(args);
+        fragment.match = match;
         return fragment;
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.layout_ai_summary, container, false);
+        binding = LayoutAiSummaryBinding.inflate(inflater, container, false);
+        geminiManager = new GeminiManager();
+        return binding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        String userName = getArguments() != null ? getArguments().getString(ARG_USER_NAME) : "";
-        String userId = getArguments() != null ? getArguments().getString(ARG_USER_ID) : "";
-        
-        TextView titleTextView = view.findViewById(R.id.aiTitleTextView);
-        TextView descriptionTextView = view.findViewById(R.id.aiDescriptionTextView);
+        if (match != null) {
+            binding.aiTitle.setText(getString(R.string.ai_summary_desc, match.getName()));
+            generateAiInsights();
+        }
 
-        titleTextView.setText("AI Insights on " + userName);
-        descriptionTextView.setText(String.format("%s is a very interesting person. Based on her interests, it seems you have a lot in common.", userName));
-
-        view.findViewById(R.id.actionButton).setOnClickListener(v -> {
-            Intent intent = new Intent(getContext(), ChatActivity.class);
-            intent.putExtra("user_name", userName);
-            intent.putExtra("user_id", userId);
-            startActivity(intent);
+        binding.startChatButton.setOnClickListener(v -> {
+            if (match != null) {
+                Intent intent = new Intent(getContext(), ChatActivity.class);
+                intent.putExtra("user_name", match.getName());
+                intent.putExtra("user_id", match.getId());
+                startActivity(intent);
+            }
             dismiss();
         });
+    }
+
+    private void generateAiInsights() {
+        setLoading(true);
+        geminiManager.generateMatchInsights(match, new GeminiManager.GeminiCallback() {
+            @Override
+            public void onSuccess(String response) {
+                if (isAdded() && binding != null) {
+                    requireActivity().runOnUiThread(() -> {
+                        setLoading(false);
+                        binding.aiContentText.setText(response);
+                    });
+                }
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                if (isAdded() && binding != null) {
+                    requireActivity().runOnUiThread(() -> {
+                        setLoading(false);
+                        binding.aiContentText.setText("מצטערים, לא הצלחנו לייצר תובנות כרגע. נסה שוב מאוחר יותר.");
+                    });
+                }
+            }
+        });
+    }
+
+    private void setLoading(boolean isLoading) {
+        if (binding == null) return;
+        binding.aiProgressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+        binding.aiContentText.setVisibility(isLoading ? View.GONE : View.VISIBLE);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
     }
 }

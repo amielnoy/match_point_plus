@@ -1,7 +1,5 @@
 package com.matchpointplus.viewmodels;
 
-import android.os.Handler;
-import android.os.Looper;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -10,41 +8,49 @@ import com.matchpointplus.data.SupabaseManager;
 import com.matchpointplus.models.Match;
 import java.util.List;
 
+/**
+ * Clean Code Refactored MatchesViewModel
+ * Properly utilizes the repository pattern for data manipulation.
+ */
 public class MatchesViewModel extends ViewModel {
     private final MatchRepository repository;
-    private final MutableLiveData<List<Match>> matches = new MutableLiveData<>();
-    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    private final MutableLiveData<List<Match>> matchesLiveData = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
 
     public MatchesViewModel() {
-        repository = MatchRepository.getInstance();
+        this.repository = MatchRepository.getInstance();
     }
 
     public LiveData<List<Match>> getMatches() {
-        return matches;
+        return matchesLiveData;
+    }
+
+    public LiveData<Boolean> getIsLoading() {
+        return isLoading;
     }
 
     public void refreshMatches() {
-        // אנחנו עוברים לתהליך הראשי לפני הקריאה ל-observeForever של ה-Repository
-        mainHandler.post(() -> {
-            repository.getMatches().observeForever(result -> {
-                matches.postValue(result);
-            });
+        isLoading.setValue(true);
+        repository.getMatches().observeForever(result -> {
+            matchesLiveData.postValue(result);
+            isLoading.postValue(false);
         });
     }
 
     public void removeMatch(Match match) {
         if (match == null) return;
-        
-        SupabaseManager.updateMatchSelection(match.getId(), false, new SupabaseManager.SupabaseCallback<Void>() {
+
+        // Corrected: use the repository method which is already defined to handle this
+        repository.updateMatchSelection(match.getId(), false, new SupabaseManager.SupabaseCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
-                // רענון הרשימה לאחר מחיקה מוצלחת
+                // Successful update triggers a state refresh
                 refreshMatches();
             }
 
             @Override
             public void onError(Exception e) {
-                // במקרה של שגיאה, ננסה לרענן בכל זאת כדי לסנכרן מצב
+                // Refresh anyway to keep UI in sync with server state
                 refreshMatches();
             }
         });

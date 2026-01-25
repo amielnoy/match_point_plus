@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -15,12 +16,14 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 import com.bumptech.glide.Glide;
 import com.matchpointplus.R;
+import com.matchpointplus.data.SupabaseManager;
 import com.matchpointplus.databinding.ActivityProfileBinding;
 import com.matchpointplus.models.User;
 import com.matchpointplus.viewmodels.ProfileViewModel;
 
 public class ProfileActivity extends AppCompatActivity {
 
+    private static final String TAG = "ProfileActivity";
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int PERMISSION_REQUEST_CAMERA = 101;
     
@@ -66,9 +69,10 @@ public class ProfileActivity extends AppCompatActivity {
     private void displayUserData() {
         User currentUser = viewModel.getCurrentUser();
         if (currentUser != null) {
-            String firstName = currentUser.getEmail().split("@")[0];
+            String email = currentUser.getEmail();
+            String firstName = (email != null && email.contains("@")) ? email.split("@")[0] : "משתמש";
             binding.userNameTextView.setText(getString(R.string.hello_user, firstName));
-            binding.userEmailTextView.setText(currentUser.getEmail());
+            binding.userEmailTextView.setText(email);
             
             if (currentUser.getProfilePicture() != null && !currentUser.getProfilePicture().isEmpty()) {
                 Glide.with(this)
@@ -94,6 +98,7 @@ public class ProfileActivity extends AppCompatActivity {
         try {
             startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
         } catch (Exception e) {
+            Log.e(TAG, "Camera failed to open: " + e.getMessage());
             Toast.makeText(this, "לא ניתן לפתוח את המצלמה", Toast.LENGTH_SHORT).show();
         }
     }
@@ -127,14 +132,24 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void handleImageUpload(Bitmap bitmap) {
         Toast.makeText(this, "מעלה תמונה...", Toast.LENGTH_SHORT).show();
-        viewModel.uploadImage(bitmap).observe(this, publicUrl -> {
-            if (publicUrl != null) {
-                User user = viewModel.getCurrentUser();
-                if (user != null) {
-                    viewModel.updateProfilePicture(user.getId(), publicUrl);
-                }
-            } else {
-                Toast.makeText(this, "העלאת התמונה נכשלה", Toast.LENGTH_SHORT).show();
+        // Updated to use a safer callback structure to get the error message
+        SupabaseManager.uploadImage(bitmap, new SupabaseManager.SupabaseCallback<String>() {
+            @Override
+            public void onSuccess(String publicUrl) {
+                runOnUiThread(() -> {
+                    User user = viewModel.getCurrentUser();
+                    if (user != null) {
+                        viewModel.updateProfilePicture(user.getId(), publicUrl);
+                    }
+                });
+            }
+
+            @Override
+            public void onError(Exception e) {
+                runOnUiThread(() -> {
+                    Log.e(TAG, "Upload failed: " + e.getMessage());
+                    Toast.makeText(ProfileActivity.this, "שגיאת שרת: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                });
             }
         });
     }
