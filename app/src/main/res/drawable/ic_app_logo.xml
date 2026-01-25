@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="1024dp"
+    android:height="1024dp"
+    android:viewportWidth="1024"
+    android:viewportHeight="1024">
+    
+    <!-- Background Circle for a modern app look -->
+    <path
+        android:fillColor="@color/primary"
+        android:pathData="M512,512m-512,0a512,512 0,1 1,1024 0a512,512 0,1 1,-1024 0" />
+
+    <!-- The Heart -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M512,840c-15,0 -30,-6 -41,-17c-100,-100 -289,-289 -289,-443c0,-110 89,-200 200,-200c55,0 105,22 141,58c36,-36 86,-58 141,-58c111,0 200,90 200,200c0,154 -189,343 -289,443c-11,11 -26,17 -41,17Z" />
+
+    <!-- Sparkle 1 -->
+    <path
+        android:fillColor="@color/primary"
+        android:pathData="M750,250l15,45l45,15l-45,15l-15,45l-15,-45l-45,-15l45,-15z" />
+        
+    <!-- Sparkle 2 -->
+    <path
+        android:fillColor="@color/primary"
+        android:pathData="M820,380l10,30l30,10l-30,10l-10,30l-10,-30l-30,-10l30,-10z" />
+</vector>

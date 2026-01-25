@@ -1,11 +1,13 @@
 package com.matchpointplus.viewmodels;
 
+import android.graphics.Bitmap;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import com.matchpointplus.data.SupabaseManager;
 import com.matchpointplus.models.Match;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -60,6 +62,37 @@ public class SearchViewModel extends ViewModel {
         applyFilters();
     }
 
+    public void updateMatchImage(Match match, Bitmap bitmap, SupabaseManager.SupabaseCallback<String> callback) {
+        SupabaseManager.uploadImage(bitmap, new SupabaseManager.SupabaseCallback<String>() {
+            @Override
+            public void onSuccess(String imageUrl) {
+                // לאחר העלאת התמונה ל-Storage, נעדכן את שדה ה-profile_picture בטבלת ה-matches
+                updateMatchProfilePicture(match.getId(), imageUrl, callback);
+            }
+
+            @Override
+            public void onError(Exception e) {
+                callback.onError(e);
+            }
+        });
+    }
+
+    private void updateMatchProfilePicture(String matchId, String imageUrl, SupabaseManager.SupabaseCallback<String> callback) {
+        // שימוש במתודה הגנרית החדשה לעדכון שדה ספציפי (profile_picture)
+        SupabaseManager.updateMatchField(matchId, "profile_picture", imageUrl, new SupabaseManager.SupabaseCallback<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                callback.onSuccess(imageUrl);
+                fetchAllCandidates(); // רענון הרשימה כדי להציג את התמונה החדשה
+            }
+
+            @Override
+            public void onError(Exception e) {
+                callback.onError(e);
+            }
+        });
+    }
+
     private void applyFilters() {
         List<Match> filteredList = new ArrayList<>();
         for (Match match : allMatches) {
@@ -90,7 +123,6 @@ public class SearchViewModel extends ViewModel {
     }
 
     public void addMatch(Match match, SupabaseManager.SupabaseCallback<Void> callback) {
-        // Optimized: Only update the selection status via PATCH
         SupabaseManager.updateMatchSelection(match.getId(), true, callback);
     }
 }

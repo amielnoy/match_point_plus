@@ -1,56 +1,57 @@
 package com.matchpointplus.views;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 import com.bumptech.glide.Glide;
 import com.matchpointplus.R;
+import com.matchpointplus.databinding.ActivityProfileBinding;
 import com.matchpointplus.models.User;
 import com.matchpointplus.viewmodels.ProfileViewModel;
 
 public class ProfileActivity extends AppCompatActivity {
 
     private static final int REQUEST_IMAGE_CAPTURE = 1;
-    private ImageView profileImageView;
-    private TextView userNameTextView;
-    private TextView userEmailTextView;
+    private static final int PERMISSION_REQUEST_CAMERA = 101;
+    
+    private ActivityProfileBinding binding;
     private ProfileViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_profile);
+        binding = ActivityProfileBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         viewModel = new ViewModelProvider(this).get(ProfileViewModel.class);
         
         setupToolbar();
-        initViews();
+        setupListeners();
         setupObservers();
         
         displayUserData();
     }
 
     private void setupToolbar() {
-        Toolbar toolbar = findViewById(R.id.profileToolbar);
-        setSupportActionBar(toolbar);
+        setSupportActionBar(binding.profileToolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle(R.string.my_profile);
         }
     }
 
-    private void initViews() {
-        profileImageView = findViewById(R.id.profileImageView);
-        userNameTextView = findViewById(R.id.userNameTextView);
-        userEmailTextView = findViewById(R.id.userEmailTextView);
-        findViewById(R.id.editProfileButton).setOnClickListener(v -> dispatchTakePictureIntent());
+    private void setupListeners() {
+        binding.editProfileButton.setOnClickListener(v -> checkCameraPermissionAndLaunch());
     }
 
     private void setupObservers() {
@@ -65,8 +66,9 @@ public class ProfileActivity extends AppCompatActivity {
     private void displayUserData() {
         User currentUser = viewModel.getCurrentUser();
         if (currentUser != null) {
-            userNameTextView.setText("שלום, " + currentUser.getEmail().split("@")[0]);
-            userEmailTextView.setText(currentUser.getEmail());
+            String firstName = currentUser.getEmail().split("@")[0];
+            binding.userNameTextView.setText(getString(R.string.hello_user, firstName));
+            binding.userEmailTextView.setText(currentUser.getEmail());
             
             if (currentUser.getProfilePicture() != null && !currentUser.getProfilePicture().isEmpty()) {
                 Glide.with(this)
@@ -74,15 +76,37 @@ public class ProfileActivity extends AppCompatActivity {
                         .placeholder(R.mipmap.ic_launcher_round)
                         .error(R.mipmap.ic_launcher_round)
                         .circleCrop()
-                        .into(profileImageView);
+                        .into(binding.profileImageView);
             }
+        }
+    }
+
+    private void checkCameraPermissionAndLaunch() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, PERMISSION_REQUEST_CAMERA);
+        } else {
+            dispatchTakePictureIntent();
         }
     }
 
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+        try {
             startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+        } catch (Exception e) {
+            Toast.makeText(this, "לא ניתן לפתוח את המצלמה", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PERMISSION_REQUEST_CAMERA) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                dispatchTakePictureIntent();
+            } else {
+                Toast.makeText(this, "דרושה הרשאת מצלמה כדי לעדכן תמונה", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -94,7 +118,7 @@ public class ProfileActivity extends AppCompatActivity {
             if (extras != null) {
                 Bitmap imageBitmap = (Bitmap) extras.get("data");
                 if (imageBitmap != null) {
-                    profileImageView.setImageBitmap(imageBitmap);
+                    binding.profileImageView.setImageBitmap(imageBitmap);
                     handleImageUpload(imageBitmap);
                 }
             }

@@ -22,8 +22,8 @@ public class Match {
     @SerializedName("interests")
     private List<String> interests;
 
-    // Adjusted to match your specific DB column name
-    @SerializedName("profilePicture") 
+    // Supports both 'profile_picture' (standard) and 'profilePicture' (custom) from Supabase
+    @SerializedName(value = "profile_picture", alternate = {"profilePicture"}) 
     private String profilePicture;
     
     @SerializedName("pictures")

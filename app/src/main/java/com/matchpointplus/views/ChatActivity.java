@@ -15,7 +15,7 @@ public class ChatActivity extends AppCompatActivity {
 
     private ActivityChatBinding binding;
     private MessageAdapter adapter;
-    private List<Message> messages;
+    private final List<Message> messages = new ArrayList<>();
     private String receiverId;
     private ChatViewModel viewModel;
 
@@ -36,7 +36,6 @@ public class ChatActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        messages = new ArrayList<>();
         adapter = new MessageAdapter(messages);
         binding.chatRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         binding.chatRecyclerView.setAdapter(adapter);
@@ -45,17 +44,20 @@ public class ChatActivity extends AppCompatActivity {
         
         observeViewModel();
         
-        // Start real-time listening
+        // טעינת היסטוריה והפעלת Realtime
         viewModel.startRealtimeUpdates(receiverId);
     }
 
     private void observeViewModel() {
         viewModel.getMessages(receiverId).observe(this, result -> {
             if (result != null) {
-                messages.clear();
-                messages.addAll(result);
-                adapter.notifyDataSetChanged();
-                binding.chatRecyclerView.scrollToPosition(messages.size() - 1);
+                // עדכון הרשימה רק אם היא השתנתה באמת
+                if (result.size() != messages.size()) {
+                    messages.clear();
+                    messages.addAll(result);
+                    adapter.notifyDataSetChanged();
+                    binding.chatRecyclerView.scrollToPosition(messages.size() - 1);
+                }
             }
         });
     }
@@ -63,18 +65,23 @@ public class ChatActivity extends AppCompatActivity {
     private void sendMessage() {
         String text = binding.messageEditText.getText().toString().trim();
         if (!text.isEmpty()) {
+            // 1. יצירת הודעה חדשה
             Message newMessage = new Message(text, true, receiverId);
-            // Optimized: We don't manually add to local list here, 
-            // the realtime callback will handle the update.
-            viewModel.sendMessage(newMessage);
+            
+            // 2. הוספה מיידית ל-UI (חוויה מהירה למשתמש)
+            messages.add(newMessage);
+            adapter.notifyItemInserted(messages.size() - 1);
+            binding.chatRecyclerView.scrollToPosition(messages.size() - 1);
             binding.messageEditText.setText("");
+
+            // 3. שמירה בענן
+            viewModel.sendMessage(newMessage);
         }
     }
 
     @Override
     protected void onDestroy() {
-        super.onPause();
-        // Stop real-time listening to save battery/bandwidth
+        super.onDestroy();
         viewModel.stopRealtimeUpdates();
     }
 

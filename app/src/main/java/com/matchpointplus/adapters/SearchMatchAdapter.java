@@ -19,14 +19,20 @@ public class SearchMatchAdapter extends RecyclerView.Adapter<SearchMatchAdapter.
     private static final String TAG = "SearchMatchAdapter";
     private List<Match> matches;
     private OnAddMatchClickListener addClickListener;
+    private OnImageClickListener imageClickListener;
 
     public interface OnAddMatchClickListener {
         void onAddClick(Match match);
     }
 
-    public SearchMatchAdapter(List<Match> matches, OnAddMatchClickListener listener) {
+    public interface OnImageClickListener {
+        void onImageClick(Match match);
+    }
+
+    public SearchMatchAdapter(List<Match> matches, OnAddMatchClickListener addListener, OnImageClickListener imageListener) {
         this.matches = matches;
-        this.addClickListener = listener;
+        this.addClickListener = addListener;
+        this.imageClickListener = imageListener;
     }
 
     public void setMatches(List<Match> matches) {
@@ -44,7 +50,7 @@ public class SearchMatchAdapter extends RecyclerView.Adapter<SearchMatchAdapter.
     @Override
     public void onBindViewHolder(@NonNull SearchViewHolder holder, int position) {
         Match match = matches.get(position);
-        holder.bind(match, addClickListener);
+        holder.bind(match, addClickListener, imageClickListener);
     }
 
     @Override
@@ -68,29 +74,26 @@ public class SearchMatchAdapter extends RecyclerView.Adapter<SearchMatchAdapter.
             addButton = itemView.findViewById(R.id.addButton);
         }
 
-        public void bind(Match match, OnAddMatchClickListener listener) {
+        public void bind(Match match, OnAddMatchClickListener addListener, OnImageClickListener imageListener) {
             nameTextView.setText(match.getName());
             metaTextView.setText("גיל: " + match.getAge() + ", מיקום: " + match.getLocation());
             bioTextView.setText("\"" + match.getBio() + "\"");
 
             String imageUrl = match.getProfilePicture();
-            Log.d(TAG, "טוען תמונה לחיפוש: " + match.getName() + " URL: " + imageUrl);
-
-            if (imageUrl != null && !imageUrl.isEmpty()) {
-                Glide.with(itemView.getContext())
-                        .load(imageUrl)
-                        .centerCrop()
-                        .placeholder(R.mipmap.ic_launcher_round)
-                        .error(R.mipmap.ic_launcher_round)
-                        .into(matchImageView);
-            } else {
-                matchImageView.setImageResource(R.mipmap.ic_launcher_round);
-            }
+            
+            Glide.with(itemView.getContext())
+                    .load(imageUrl != null && !imageUrl.isEmpty() ? imageUrl : R.mipmap.ic_launcher_round)
+                    .centerCrop()
+                    .placeholder(R.mipmap.ic_launcher_round)
+                    .error(R.mipmap.ic_launcher_round)
+                    .into(matchImageView);
 
             addButton.setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onAddClick(match);
-                }
+                if (addListener != null) addListener.onAddClick(match);
+            });
+
+            matchImageView.setOnClickListener(v -> {
+                if (imageListener != null) imageListener.onImageClick(match);
             });
         }
     }

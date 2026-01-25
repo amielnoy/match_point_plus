@@ -21,6 +21,7 @@
     <string name="edit_profile">ערוך פרופיל</string>
     <string name="take_photo">צלם תמונת פרופיל חדשה</string>
     <string name="profile_updated">הפרופיל עודכן בהצלחה!</string>
+    <string name="hello_user">שלום, %1$s</string>
     
     <!-- Navigation Menu -->
     <string name="menu_matches">שידוכים</string>

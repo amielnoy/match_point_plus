@@ -2,8 +2,8 @@ package com.matchpointplus.views;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.Patterns;
-import android.view.View;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -12,6 +12,7 @@ import com.matchpointplus.viewmodels.LoginViewModel;
 
 public class LoginActivity extends AppCompatActivity {
 
+    private static final String TAG = "LoginActivity";
     private ActivityLoginBinding binding;
     private LoginViewModel viewModel;
 
@@ -42,15 +43,18 @@ public class LoginActivity extends AppCompatActivity {
         if (!validateInput(email, password)) return;
 
         setLoading(true);
+        Log.d(TAG, "Attempting login for: " + email);
 
         viewModel.login(email, password).observe(this, user -> {
             setLoading(false);
             if (user != null) {
-                Toast.makeText(LoginActivity.this, "ברוכים הבאים ל-Sugar Meet!", Toast.LENGTH_SHORT).show();
+                Log.d(TAG, "Login successful: " + user.getEmail());
+                Toast.makeText(LoginActivity.this, "ברוכים הבאים ל-שוגר מיט!", Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(LoginActivity.this, MatchesActivity.class));
                 finish();
             } else {
-                Toast.makeText(LoginActivity.this, "אימייל או סיסמה שגויים", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "Login failed: No user found or network error");
+                Toast.makeText(LoginActivity.this, "אימייל או סיסמה שגויים (או בעיית הרשאות בשרת)", Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -68,17 +72,11 @@ public class LoginActivity extends AppCompatActivity {
             binding.passwordEditText.setError("אנא הזן סיסמה");
             return false;
         }
-        if (password.length() < 6) {
-            binding.passwordEditText.setError("הסיסמה חייבת להכיל לפחות 6 תווים");
-            return false;
-        }
         return true;
     }
 
     private void setLoading(boolean isLoading) {
-        if (binding.progressBar != null) {
-            binding.progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
-        }
+        binding.progressBar.setVisibility(isLoading ? android.view.View.VISIBLE : android.view.View.GONE);
         binding.loginButton.setEnabled(!isLoading);
         binding.emailEditText.setEnabled(!isLoading);
         binding.passwordEditText.setEnabled(!isLoading);

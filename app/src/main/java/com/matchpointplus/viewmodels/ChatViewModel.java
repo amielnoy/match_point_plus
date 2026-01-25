@@ -8,6 +8,7 @@ import com.matchpointplus.data.SupabaseManager;
 import com.matchpointplus.models.Message;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class ChatViewModel extends ViewModel {
     private final ChatRepository repository;
@@ -26,21 +27,22 @@ public class ChatViewModel extends ViewModel {
 
     public void startRealtimeUpdates(String receiverId) {
         SupabaseManager.subscribeToMessages(receiverId, newMessage -> {
+            if (newMessage == null) return;
+
             List<Message> currentMessages = messagesLiveData.getValue();
             if (currentMessages == null) {
                 currentMessages = new ArrayList<>();
             }
-            // Check if message is already in list to avoid duplicates
-            boolean exists = false;
-            for (Message m : currentMessages) {
-                if (m.getText().equals(newMessage.getText())) { // Simplify check
-                    exists = true;
-                    break;
-                }
-            }
-            if (!exists) {
-                currentMessages.add(newMessage);
-                messagesLiveData.postValue(currentMessages);
+            
+            // שיפור: בדיקה לפי ID למניעת כפילויות באמצעות Stream API למען קוד נקי יותר
+            boolean isDuplicate = currentMessages.stream()
+                    .anyMatch(m -> Objects.equals(m.getId(), newMessage.getId()));
+            
+            if (!isDuplicate) {
+                // יצירת עותק חדש של הרשימה (Best Practice לעדכון LiveData)
+                List<Message> updatedList = new ArrayList<>(currentMessages);
+                updatedList.add(newMessage);
+                messagesLiveData.postValue(updatedList);
             }
         });
     }

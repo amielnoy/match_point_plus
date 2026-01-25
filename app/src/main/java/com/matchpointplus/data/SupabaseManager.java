@@ -16,9 +16,9 @@ import java.util.List;
 import java.util.UUID;
 
 public class SupabaseManager {
-    private static final String TAG = "SupabaseManager";
-    private static final String SUPABASE_URL = "https://qpharxkcirttiaowqxaf.supabase.co";
-    private static final String SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwaGFyeGtjaXJ0dGlhb3dxeGFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc2MTY2OTMsImV4cCI6MjA4MzE5MjY5M30.5yFWXT-TQR8rE9NtpRcMFnIZOxDxZVlAYLOjBiqxbxU";
+    private static final String TAG = "SupabaseDebug";
+    private static final String SUPABASE_URL = "https://cdnfheioownyfzqpyrci.supabase.co";
+    private static final String SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNkbmZoZWlvb3dueWZ6cXB5cmNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkzNDk0ODksImV4cCI6MjA4NDkyNTQ4OX0.RTvRB4yYKLPaKLMqhieluVFDo_6V3MPmpvslptk0ffY";
 
     private static final OkHttpClient client = new OkHttpClient();
     private static final Gson gson = new Gson();
@@ -37,57 +37,6 @@ public class SupabaseManager {
         void onNewMessage(Message message);
     }
 
-    // --- Realtime ---
-
-    public static void subscribeToMessages(String receiverId, RealtimeCallback callback) {
-        String wsUrl = SUPABASE_URL.replace("https://", "wss://") + "/realtime/v1/websocket?apikey=" + SUPABASE_KEY;
-        Request request = new Request.Builder().url(wsUrl).build();
-
-        realtimeSocket = client.newWebSocket(request, new WebSocketListener() {
-            @Override
-            public void onOpen(WebSocket webSocket, Response response) {
-                Log.d(TAG, "Realtime WebSocket Opened");
-                // Join the channel for messages table
-                try {
-                    JSONObject joinMsg = new JSONObject();
-                    joinMsg.put("topic", "realtime:public:messages");
-                    joinMsg.put("event", "phx_join");
-                    joinMsg.put("payload", new JSONObject());
-                    joinMsg.put("ref", "1");
-                    webSocket.send(joinMsg.toString());
-                } catch (Exception e) { e.printStackTrace(); }
-            }
-
-            @Override
-            public void onMessage(WebSocket webSocket, String text) {
-                try {
-                    JSONObject json = new JSONObject(text);
-                    if (json.has("event") && json.getString("event").equals("INSERT")) {
-                        JSONObject record = json.getJSONObject("payload").getJSONObject("record");
-                        Message newMessage = gson.fromJson(record.toString(), Message.class);
-                        
-                        // Check if the message is for the current conversation
-                        if (newMessage.getReceiverId().equals(receiverId)) {
-                            callback.onNewMessage(newMessage);
-                        }
-                    }
-                } catch (Exception e) { Log.e(TAG, "Realtime Parse Error: " + e.getMessage()); }
-            }
-
-            @Override
-            public void onFailure(WebSocket webSocket, Throwable t, Response response) {
-                Log.e(TAG, "Realtime WebSocket Failure: " + t.getMessage());
-            }
-        });
-    }
-
-    public static void unsubscribeRealtime() {
-        if (realtimeSocket != null) {
-            realtimeSocket.close(1000, "User closed chat");
-            realtimeSocket = null;
-        }
-    }
-
     // --- Authentication ---
 
     public static User getCurrentUser() { return currentUser; }
@@ -101,7 +50,7 @@ public class SupabaseManager {
                 .addQueryParameter("select", "*")
                 .build();
 
-        executeGetRequest(url, new TypeToken<List<User>>() {}, new SupabaseCallback<List<User>>() {
+        executeGetRequest(url, new TypeToken<List<User>>(){}, new SupabaseCallback<List<User>>() {
             @Override
             public void onSuccess(List<User> users) {
                 if (users != null && !users.isEmpty()) {
@@ -122,38 +71,68 @@ public class SupabaseManager {
         sendPostRequest("/rest/v1/users", gson.toJson(Collections.singletonList(newUser)), true, callback);
     }
 
+    // --- Realtime ---
+
+    public static void subscribeToMessages(String receiverId, RealtimeCallback callback) {
+        String wsUrl = SUPABASE_URL.replace("https://", "wss://") + "/realtime/v1/websocket?apikey=" + SUPABASE_KEY;
+        Request request = new Request.Builder().url(wsUrl).build();
+        realtimeSocket = client.newWebSocket(request, new WebSocketListener() {
+            @Override
+            public void onOpen(WebSocket webSocket, Response response) {
+                try {
+                    JSONObject joinMsg = new JSONObject();
+                    joinMsg.put("topic", "realtime:public:messages");
+                    joinMsg.put("event", "phx_join");
+                    joinMsg.put("payload", new JSONObject());
+                    joinMsg.put("ref", "1");
+                    webSocket.send(joinMsg.toString());
+                } catch (Exception e) { e.printStackTrace(); }
+            }
+            @Override
+            public void onMessage(WebSocket webSocket, String text) {
+                try {
+                    JSONObject json = new JSONObject(text);
+                    if (json.has("event") && json.getString("event").equals("INSERT")) {
+                        JSONObject record = json.getJSONObject("payload").getJSONObject("record");
+                        Message newMessage = gson.fromJson(record.toString(), Message.class);
+                        if (newMessage.getReceiverId().equals(receiverId)) {
+                            callback.onNewMessage(newMessage);
+                        }
+                    }
+                } catch (Exception e) { Log.e(TAG, "Realtime Parse Error: " + e.getMessage()); }
+            }
+        });
+    }
+
+    public static void unsubscribeRealtime() {
+        if (realtimeSocket != null) {
+            realtimeSocket.close(1000, "User closed chat");
+            realtimeSocket = null;
+        }
+    }
+
     // --- Storage ---
 
     public static void uploadImage(Bitmap bitmap, SupabaseCallback<String> callback) {
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, stream);
-        byte[] data = stream.toByteArray();
+        byte[] data = bitmapToByteArray(bitmap);
         String fileName = "profile_" + System.currentTimeMillis() + ".jpg";
         String bucketName = "avatars";
-
         HttpUrl url = HttpUrl.parse(SUPABASE_URL).newBuilder()
                 .addPathSegments("storage/v1/object")
                 .addPathSegment(bucketName)
                 .addPathSegment(fileName)
                 .build();
-
         Request request = buildBaseRequest(url)
                 .header("Content-Type", "image/jpeg")
-                .post(RequestBody.create(data, JPEG_MEDIA_TYPE))
-                .build();
-
+                .post(RequestBody.create(data, JPEG_MEDIA_TYPE)).build();
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) { callback.onError(e); }
-
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
-                    String publicUrl = SUPABASE_URL + "/storage/v1/object/public/" + bucketName + "/" + fileName;
-                    callback.onSuccess(publicUrl);
-                } else {
-                    callback.onError(new Exception("Upload failed: " + response.code()));
-                }
+                    callback.onSuccess(SUPABASE_URL + "/storage/v1/object/public/" + bucketName + "/" + fileName);
+                } else { callback.onError(new Exception("Upload failed: " + response.code())); }
                 response.close();
             }
         });
@@ -161,56 +140,49 @@ public class SupabaseManager {
 
     // --- Database ---
 
-    public static void saveMatches(List<Match> matches, SupabaseCallback<Void> callback) {
-        sendPostRequest("/rest/v1/matches", gson.toJson(matches), true, callback);
-    }
-
     public static void fetchMatches(SupabaseCallback<List<Match>> callback) {
-        HttpUrl url = HttpUrl.parse(SUPABASE_URL).newBuilder()
-                .addPathSegments("rest/v1/matches")
-                .addQueryParameter("is_selected", "eq.true")
-                .addQueryParameter("select", "*")
-                .build();
-        executeGetRequest(url, new TypeToken<List<Match>>() {}, callback);
+        String url = SUPABASE_URL + "/rest/v1/matches?is_selected=eq.true&select=*";
+        executeGetRequest(HttpUrl.parse(url), new TypeToken<List<Match>>() {}, callback);
     }
 
     public static void fetchAllMatches(SupabaseCallback<List<Match>> callback) {
-        HttpUrl url = HttpUrl.parse(SUPABASE_URL).newBuilder()
-                .addPathSegments("rest/v1/matches")
-                .addQueryParameter("select", "*")
-                .build();
-        executeGetRequest(url, new TypeToken<List<Match>>() {}, callback);
+        String url = SUPABASE_URL + "/rest/v1/matches?select=*";
+        executeGetRequest(HttpUrl.parse(url), new TypeToken<List<Match>>() {}, callback);
+    }
+
+    public static void saveMatches(List<Match> matches, SupabaseCallback<Void> callback) {
+        sendPostRequest("/rest/v1/matches?on_conflict=id", gson.toJson(matches), true, callback);
+    }
+
+    public static void updateMatchField(String matchId, String fieldName, Object value, SupabaseCallback<Void> callback) {
+        try {
+            JSONObject json = new JSONObject();
+            json.put(fieldName, value);
+            HttpUrl url = HttpUrl.parse(SUPABASE_URL).newBuilder().addPathSegments("rest/v1/matches")
+                    .addQueryParameter("id", "eq." + matchId).build();
+            Request request = buildBaseRequest(url).patch(RequestBody.create(json.toString(), JSON_MEDIA_TYPE)).build();
+            executeRequest(request, callback);
+        } catch (Exception e) { if (callback != null) callback.onError(e); }
     }
 
     public static void updateMatchSelection(String matchId, boolean isSelected, SupabaseCallback<Void> callback) {
-        String json = "{\"is_selected\": " + isSelected + "}";
-        HttpUrl url = HttpUrl.parse(SUPABASE_URL).newBuilder()
-                .addPathSegments("rest/v1/matches")
-                .addQueryParameter("id", "eq." + matchId)
-                .build();
-
-        Request request = buildBaseRequest(url)
-                .patch(RequestBody.create(json, JSON_MEDIA_TYPE))
-                .build();
-
-        executeRequest(request, callback);
+        updateMatchField(matchId, "is_selected", isSelected, callback);
     }
+
+    // --- Messages ---
 
     public static void saveMessage(Message message) {
         saveMessages(Collections.singletonList(message), null);
     }
 
     public static void saveMessages(List<Message> messages, SupabaseCallback<Void> callback) {
-        sendPostRequest("/rest/v1/messages", gson.toJson(messages), true, callback);
+        sendPostRequest("/rest/v1/messages?on_conflict=id", gson.toJson(messages), true, callback);
     }
 
     public static void fetchMessages(String receiverId, SupabaseCallback<List<Message>> callback) {
-        HttpUrl url = HttpUrl.parse(SUPABASE_URL).newBuilder()
-                .addPathSegments("rest/v1/messages")
-                .addQueryParameter("receiver_id", "eq." + receiverId)
-                .addQueryParameter("select", "*")
-                .addQueryParameter("order", "created_at.asc")
-                .build();
+        HttpUrl url = HttpUrl.parse(SUPABASE_URL).newBuilder().addPathSegments("rest/v1/messages")
+                .addQueryParameter("receiver_id", "eq." + receiverId).addQueryParameter("select", "*")
+                .addQueryParameter("order", "created_at.asc").build();
         executeGetRequest(url, new TypeToken<List<Message>>() {}, callback);
     }
 
@@ -225,13 +197,11 @@ public class SupabaseManager {
 
     private static void sendPostRequest(String path, String json, boolean isUpsert, SupabaseCallback<Void> callback) {
         HttpUrl url = HttpUrl.parse(SUPABASE_URL + path);
-        Request.Builder builder = buildBaseRequest(url)
-                .post(RequestBody.create(json, JSON_MEDIA_TYPE));
-
-        if (isUpsert) {
-            builder.addHeader("Prefer", "resolution=merge-duplicates");
-        }
-
+        Log.d(TAG, "POST Request to: " + url.toString());
+        Log.d(TAG, "Body: " + json);
+        
+        Request.Builder builder = buildBaseRequest(url).post(RequestBody.create(json, JSON_MEDIA_TYPE));
+        if (isUpsert) builder.addHeader("Prefer", "resolution=merge-duplicates");
         executeRequest(builder.build(), callback);
     }
 
@@ -240,15 +210,16 @@ public class SupabaseManager {
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) { callback.onError(e); }
-
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 try (ResponseBody responseBody = response.body()) {
-                    if (response.isSuccessful() && responseBody != null) {
-                        T result = gson.fromJson(responseBody.string(), typeToken.getType());
+                    String bodyString = responseBody != null ? responseBody.string() : "";
+                    if (response.isSuccessful()) {
+                        T result = gson.fromJson(bodyString, typeToken.getType());
                         callback.onSuccess(result);
-                    } else {
-                        callback.onError(new Exception("API Error " + response.code()));
+                    } else { 
+                        Log.e(TAG, "GET Error: " + bodyString);
+                        callback.onError(new Exception("Error " + response.code())); 
                     }
                 }
             }
@@ -258,17 +229,29 @@ public class SupabaseManager {
     private static void executeRequest(Request request, SupabaseCallback<Void> callback) {
         client.newCall(request).enqueue(new Callback() {
             @Override
-            public void onFailure(Call call, IOException e) { if (callback != null) callback.onError(e); }
-
+            public void onFailure(Call call, IOException e) { 
+                Log.e(TAG, "Request Failure: " + e.getMessage());
+                if (callback != null) callback.onError(e); 
+            }
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    if (callback != null) callback.onSuccess(null);
-                } else {
-                    if (callback != null) callback.onError(new Exception("Request failed: " + response.code()));
+                try (ResponseBody responseBody = response.body()) {
+                    String bodyString = responseBody != null ? responseBody.string() : "";
+                    if (response.isSuccessful()) {
+                        Log.d(TAG, "Request Success: " + bodyString);
+                        if (callback != null) callback.onSuccess(null);
+                    } else {
+                        Log.e(TAG, "Request Error (Code " + response.code() + "): " + bodyString);
+                        if (callback != null) callback.onError(new Exception("Error " + response.code() + ": " + bodyString));
+                    }
                 }
-                response.close();
             }
         });
+    }
+
+    private static byte[] bitmapToByteArray(Bitmap bitmap) {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, stream);
+        return stream.toByteArray();
     }
 }
